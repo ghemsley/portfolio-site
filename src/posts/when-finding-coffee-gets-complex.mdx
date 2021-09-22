@@ -1,0 +1,280 @@
+---
+title: When finding coffee gets complex
+author: Graham Hemsley
+slug: /posts/when-finding-coffee-gets-complex
+image: ../assets/images/posts/when-finding-coffee-gets-complex/cover.png
+featured: false
+tags:
+  - name: Programming
+  - name: Ruby
+  - name: Education
+date: 2020-12-05
+---
+
+# When finding coffee gets complex
+
+Recently at school, I was assigned the task of designing and building a [Ruby](https://www.ruby-lang.org/en/) application that meets the following requirements:
+
+1. It can be interacted with by the user via a [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface)
+2. It fetches data from a remote source using an [application programming interface](https://en.wikipedia.org/wiki/API)
+3. The data fetched must go more than one 'level' deep, ie. it should be able to list items and then provide a detail view about a given item as well
+4. It uses [object-oriented](https://en.wikipedia.org/wiki/Object-oriented_programming) design patterns
+
+When I heard this assignment was coming up, I was ecstatic! It sounded like a great way to practice what I have been learning, while having some freedom and flexibility to create a program of my own choosing that accomplished a useful task. In other words, it sounded like a lot of fun! I was looking forward to it so much that I just sort of jumped the gun and got started trying to figure out what to build right away.
+
+There were several challenging aspects of just this very first step, though. I wondered to myself for quite a while, "What task do I want it to complete? What APIs are out there that would fit the requirements? What project would be the most fun to build while still meeting all the demands of the assignment without being too large in scope?" So many questions! And nobody to answer them but me. So I deliberated for a while, and even started on several preliminary ideas before eventually settling on one that I ended up just running with.
+
+Naturally, it involves coffee. ☕️
+
+May I present to you:
+
+## Coffeefinder!
+
+![Coffeefinder!](../assets/images/posts/when-finding-coffee-gets-complex/coffeefinder.png)
+
+### What does it do?
+
+As you might surmise from the image above, it helps a user find information about nearby places that sell coffee. I figured it would be fun to blend two of my favorite things, coffee and coding. (Nevermind that I do that on a daily basis.)
+
+Here are the steps involved in using the program once it's installed:
+
+1. First, the program is launched from a terminal, potentially with some options specified using option flags.
+2. Then the user selects whether to search near the user's detected location or whether to search by address. The results can be filtered to just return coffee shops (using a loose definition of the term), or any sort of business that sells coffee at all.
+3. Next, search results are returned in a tabular format, like so:
+
+![Search results display](../assets/images/posts/when-finding-coffee-gets-complex/search-results.png)
+
+4. Finally, the user can select from those listings to display a detailed view of a given business listing, as seen below:
+
+![Business detail view](../assets/images/posts/when-finding-coffee-gets-complex/business-details.png)
+
+At any point the user can quit or go back to the main menu to do another search. Businesses can also be saved to a persistent favorites menu for easy lookup later.
+
+### How does it work?
+
+1. The user's [IP address](https://en.wikipedia.org/wiki/IP_address) is checked against a [Geolocation](https://en.wikipedia.org/wiki/Internet_geolocation) API, specifically [IP-API](https://ip-api.com/).
+2. The data returned (in [JSON](https://www.json.org/json-en.html) format) includes latitude and longitude coordinates that are then sent to [Yelp](https://www.yelp.com/)'s [GraphQL](https://graphql.org/) API.
+3. Yelp responds with business listings in the form of a special GraphQL response object.
+4. I pull information from those objects to create my own simpler listing objects as needed.
+5. The program [iterates](https://en.wikipedia.org/wiki/Iteration) on the collections of objects to create the various menus and listings you see above.
+
+That's basically it! Unless you search by address, in which case the address is sent to Yelp instead of the coordinates. However, this simple set of steps belies the complexity of their implementation.
+
+### Technologies used
+
+My program relies on a few helpful libraries to do what it does, aside from the APIs it interacts with. I freely admit that I stand on the shoulders of giants with this. Below is some information about some of the more important technologies I employ:
+
+#### [IP-API](https://ip-api.com/)
+
+This API makes use of a database of location to IP address mappings to serve data on approximately where an IP originates from geographically. It's a simple API to use (I just query the JSON endpoint with no special parameters), so it was a breeze to include in my project. This is how my program guesses where the user is located at launch.
+
+Below is the entirety of the code I use to get the user's location:
+
+```ruby
+self.response = Net::HTTP.get_response(URI(GEOIP_API + self.ip_address))
+self.data = JSON.parse(response.body).transform_keys!(&:to_sym)
+```
+
+The first line is where I talk with IP-API and receive a response in JSON format. The second line is where I parse that JSON and turn it into something a little friendlier to Ruby. Couldn't really be much simpler.
+
+#### [Yelp GraphQL API](https://www.yelp.com/developers/graphql/guides/intro)
+
+This API, still in beta, is substantially more complex than the previous one. However, I had previous experience using GraphQL from building the site that you're reading this on using GatsbyJS, which makes heavy use of GraphQL. So it wasn't especially difficult to make use of in my project, once I had played around with the API a bit using a tool called [Insomnia Core](https://insomnia.rest/products/core/). Plus, I just love using GraphQL compared to REST for some reason, I guess I just like writing the syntax 🤓
+
+In any case, this API serves up all kinds of data on all kinds of businesses in countries around the world, and is what I use to find coffee shops near the user after I send it geolocation coordinates from the first API (or an address).
+
+Just because I love staring at GraphQL queries, here is an example of a query my app uses against Yelp's API:
+
+```graphql
+query(
+  $latitude: Float
+  $longitude: Float
+  $radius: Float
+  $limit: Int
+  $sort_by: String
+  $offset: Int
+) {
+  search(
+    categories: "coffee"
+    latitude: $latitude
+    longitude: $longitude
+    radius: $radius
+    limit: $limit
+    sort_by: $sort_by
+    offset: $offset
+  ) {
+    total
+    business {
+      id
+      name
+      rating
+      review_count
+      distance
+      price
+      url
+      phone
+      hours {
+        is_open_now
+      }
+      location {
+        address1
+        city
+      }
+    }
+  }
+}
+```
+
+#### [Graphlient](https://github.com/ashkan18/graphlient)
+
+Graphlient is the Ruby GraphQL client library I use to make queries against Yelp's API. It is very easy to use; all you do is initialize a client object and then pass it a query as a string along with the API endpoint to use. Very handy!
+
+Below is an example from my project of how to create a GraphQL client instance with Graphlient:
+
+```ruby
+client = Graphlient::Client.new(YELP_API,
+                                  headers: {
+                                    'Authorization' => "Bearer #{API_KEY}"
+                                  },
+                                  http_options: {
+                                    read_timeout: 30
+                                  })
+```
+
+The bits in capital letters are Ruby constants that I define elsewhere. But basically, `YELP_API` is a web URL and `API_KEY` is a top secret string of random-looking characters that you are not allowed to see, lest I get ratelimited or banned by Yelp which would not be good! 😅
+
+#### [Optparse](https://ruby-doc.org/stdlib-2.7.2/libdoc/optparse/rdoc/OptionParser.html)
+
+Optparse/OptionParser is a Ruby built-in library that makes creating option flags for your CLI program pretty simple. Below is an example of the code for one of the options my program accepts:
+
+```ruby
+opts.on('-r', '--radius MILES', 'How big of an area to search, in miles. Default: 0.5, max 10') do |radius|
+  raise ParserError unless (0..10).include?(radius.to_f)
+  options[:radius] = [radius.to_f * 1609.34, 16_093.4].min || DEFAULT_RADIUS
+end
+```
+
+Here you might notice something going on with multiplication. If you paid quite close attention in grade school (unlike me), you might also remember off the top of your head that a mile is about 1609.34 meters. Yelp's API uses meters as a default unit for distances, so here I am converting the user's radius input to meters from an input of miles. Some other logic was needed throughout the program to ensure a consistent and logical display of units in miles despite Yelp's API preferring the metric system. I dream of a day where the US will join the rest of the sensible world and I won't need to do stuff like this anymore.
+
+#### [TTY Toolkit](https://ttytoolkit.org/)
+
+This is a family of gems meant to help someone create a CLI program with a friendly interface quickly and easily. I use two of the gems they provide, `tty-prompt` and `tty-table`. The prompt creation syntax is especially beautiful; for example, below I show how my main menu is created using `tty-prompt`:
+
+```ruby
+prompt.select('Choose an action:') do |menu|
+  menu.default 1
+  menu.choice 'Show nearby coffee shops', 1
+  menu.choice 'Show any nearby business that has coffee', 2
+  menu.choice 'Search for coffee near a certain address', 3
+  menu.choice 'Quit', 4
+end
+```
+
+What a friendly library! 😌
+
+#### Complexity and refactoring
+
+All of these technologies (and a few more) have been employed together to create my app. Certainly it was a lot of work, but it was really a joy for me. And I hope the result is satisfactory to whoever finds themselves using my app. But my biggest takeaway from building it all was that learning to manage complexity is incredibly important when creating an app of this scope (which is to say, a fairly small scope in the grand scheme!), or especially anything larger. I had to spend several days and nights refactoring, testing, and refactoring some more to get the code into something of a presentable state, and even then it still spans 9 classes, 3 modules and over 1150 lines of code. Trying to keep track of everything going on is certainly difficult if you aren't being careful to modularize and encapsulate your code. Even then, it strains my working memory to update the codebase substantially.
+
+Case in point, I have a new feature I've been working on in a separate branch on GitHub that stores favorite businesses for later retrieval, and while I successfully got the feature working and have it basically where I'd like it to be, it took quite a lot of brain-exercise to add it given everything else the program already does, involving several days of refactoring to have the code make some sense and be worth merging on top of 'simply' getting it to work.
+
+### Parts of the project that I am proud of
+
+I am proud of how the code for the project is nicely separated into various types of tasks and concerns. I think I did a decent job splitting up those 1156 lines into manageable-enough chunks. It wasn't always that way though, especially when I first got it into a working state. It's much better now after spending some time on refactoring. For example, the CLI class is mostly just limited to a series of `case` statements that describe the flow between menus, like so:
+
+```ruby
+def search_complete_menu
+  yelp.offset = 0
+  choice = prompt.search_complete_prompt
+  case choice
+  when 1
+    business_menu
+  when 2
+    main_menu
+  when 3
+    exit(true)
+  end
+  nil
+end
+```
+
+I am also proud of a few solutions I came up with. One of the problems I faced was that I needed a way to display only the businesses that were returned from the most recent Yelp API query. Otherwise, the list of businesses to display would grow, and grow, and grow even if you searched different addresses. That would quickly become confusing for the user. So I came up with a couple steps to solve the problem.
+
+In the program's `Business` class (which stores information about business listings fetched from Yelp in the form of a custom object) I have these methods which find or instantiate `Business` objects and keep track of all of them using an array:
+
+```ruby
+@@all = []
+
+def self.all
+  @@all
+end
+
+def self.find_or_create_by_id(business)
+  all.find do |existing_business|
+    existing_business.id == business.id
+  end || new(business)
+end
+```
+
+In its `initialize` method I have:
+
+```ruby
+self.class.all.push(self)
+```
+
+So every instance of a business is kept track of by the `Business` class, and the class can find instances of itself. That lets me do this, in the `Yelp` class where I manage queries and store search results in an array (a search in this context is an array of the business listing objects returned from a Yelp query):
+
+```ruby
+def searches_to_business_instances
+  last_search_business_results = []
+  searches.each do |search|
+    search.business.each do |business_result|
+      last_search_business_results.push(business_result)
+    end
+  end
+  self.businesses = last_search_business_results.collect do |business_result|
+    Business.find_or_create_by_id(business_result)
+  end
+  businesses
+end
+```
+
+This method is accessing the array of search results and adding to a new array every business object returned from my GraphQL query that came from the last search, then either finding or instantiating my own `Business` class instances based on the objects in that new array.
+
+The previous method relies on the following methods in the `Yelp` Class being called throughout the program's lifespan to work:
+
+```ruby
+def save_search(search)
+  searches.push(search)
+  searches
+end
+
+def clear_searches
+  searches.clear
+  searches
+end
+```
+
+These methods are what store the search results I obtain so that I can access those results later, or get rid of them when the user starts a new search. All of this basically prevents the search results from accumulating to an unmanageable size, and I am proud of the fact that I was able to come up with a reasonably simple solution.
+
+### Things to improve on
+
+One of the things I hope to improve is to find a way of looking up the user's location that is a little more reliable. The API I currently use sometimes gets the location wrong by a little bit, so maybe I can replace it with a different one someday that has better accuracy.
+Aside from that, I wasn't sure how to implement some of the object relationships I have learned about throughout my course for this project. To some extent I felt like the app didn't call for a complex relationship between most of the objects, but perhaps there is a way I could refactor it to include them in the future.
+Also, I noticed that taking a little break from coding or getting an outside perspective really helped me come back to the long refactoring process with new ideas on how to make things more manageable.
+I think that as far as my coding process goes, I could improve by taking more breaks instead of doing long sprints, as it seems to help me avoid getting stuck in a sort of rut when it comes to refactoring where I can't see any ways to keep breaking things down.
+I am sure I will find many more ways to improve my code as I go about my studies, of course.
+
+### Final thoughts
+
+This project was actually very fun to work on. I spent long nights staying up until the early morning coding, debugging, testing, and refactoring and I enjoyed every minute of it. I feel like I thrive and learn best with assignments like these where I have some flexibility to use my creativity and interests to help shape the outcome. I am excited for the next similar project to come around so that I can have such a fun learning opportunity again!
+
+By the way, the code for this project lives at [GitHub](https://github.com/ghemsley/coffeefinder).
+
+You are very welcome to check it out and let me know what you think, or even, dare I say, fork it? 😃
+
+Here is a video of the app in action:
+
+`youtube: https://www.youtube.com/watch?v=eeYOinOoiAI`
+
+# Thanks for reading!
