@@ -1,26 +1,26 @@
 import React from 'react'
-import { GatsbySeo } from 'gatsby-plugin-next-seo'
 import { useStaticQuery, graphql } from 'gatsby'
+import { GatsbySeo } from 'gatsby-plugin-next-seo'
 
 import Layout from '../components/Layout'
-import ProjectsList from '../components/projectsList'
+import PostsList from '../components/postsList'
 
-
-
-const Index = ({location}) => {
+const Blog = ({ location }) => {
   const data = useStaticQuery(graphql`
     {
       allMdx(
-        filter: { fileAbsolutePath: { regex: "/^.+/projects/gi" } }
+        filter: { fileAbsolutePath: { regex: "/^.+/posts/gi" } }
         sort: { order: DESC, fields: frontmatter___date }
       ) {
         edges {
           node {
             id
             excerpt(pruneLength: 280)
+            timeToRead
+            slug
             frontmatter {
-              name
-              slug
+              title
+              author
               image {
                 childImageSharp {
                   gatsbyImageData(
@@ -30,8 +30,12 @@ const Index = ({location}) => {
                   )
                 }
               }
-              languages
-              date(formatString: "MMMM YYYY")
+              slug
+              tags {
+                name
+              }
+              date(formatString: "MMMM D, YYYY")
+              featured
             }
           }
         }
@@ -42,15 +46,15 @@ const Index = ({location}) => {
     <>
       <GatsbySeo
         language='en'
-        title='Portfolio'
-        description={`A development portfolio by Graham Hemsley`}
+        title='Blog'
+        description={`A development blog by Graham Hemsley`}
         openGraph={{
           type: 'website',
-          title: 'Portfolio',
+          title: 'Blog',
           locale: 'en_US',
           site_name: 'Portfolio',
-          url: 'https://www.grahamhemsley.com/',
-          description: 'A development portfolio by Graham Hemsley',
+          url: 'https://www.grahamhemsley.com/blog',
+          description: 'A development blog by Graham Hemsley',
           images: [
             {
               url: 'https://www.grahamhemsley.com/preview.jpg',
@@ -62,11 +66,10 @@ const Index = ({location}) => {
         }}
       />
       <Layout>
-        <h1 className='page-header'>Projects</h1>
-        <ProjectsList location={location} data={data}/>
+        <PostsList location={location} data={data} />
       </Layout>
     </>
   )
 }
 
-export default Index
+export default Blog
