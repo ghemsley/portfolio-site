@@ -6,7 +6,11 @@ const Nav = props => {
   const data = useStaticQuery(graphql`
     {
       allFile(
-        filter: { sourceInstanceName: { eq: "pages" }, name: { ne: "index" } }
+        filter: {
+          sourceInstanceName: { eq: "pages" }
+          name: { regex: "/^(?!index$)(?!404$).*/i" }
+        }
+        sort: { order: ASC, fields: name }
       ) {
         edges {
           node {
