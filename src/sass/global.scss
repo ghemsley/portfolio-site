@@ -315,7 +315,7 @@ ul {
       user-select: none;
       cursor: pointer;
       padding: 0.33em 1em 0.33em 1em;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.1rem;
       white-space: nowrap;
       position: relative;
       transition: all ease 250ms;
@@ -351,7 +351,7 @@ ul {
     flex-direction: row;
     flex-wrap: wrap;
     margin: 0;
-    flex-basis: 32px;
+    flex-basis: 36px;
     flex-grow: 0;
     flex-shrink: 1;
     gap: 1rem;
@@ -361,8 +361,8 @@ ul {
       .social-link-icon {
         color: white;
         transition: all ease 250ms;
-        max-height: 32px;
-        max-width: 32px;
+        max-height: 36px;
+        max-width: 36px;
       }
       svg {
         height: fit-content;
@@ -378,10 +378,11 @@ ul {
 
   @media (min-width: 1200px) {
     .social-links {
+      flex-basis: 46px;
       .social-link {
         .social-link-icon {
-          max-height: 48px;
-          max-width: 48px;
+          max-height: 46px;
+          max-width: 46px;
         }
       }
     }
