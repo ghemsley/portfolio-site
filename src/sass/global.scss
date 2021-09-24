@@ -999,6 +999,7 @@ figcaption {
 }
 
 .blog-post-content > img {
+  place-self: center;
   display: block;
   margin: 2rem;
   box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.12),
@@ -1225,6 +1226,10 @@ figcaption {
   margin: 1rem;
   margin-top: 0;
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
 }
 
 @media (min-width: 1200px) {
