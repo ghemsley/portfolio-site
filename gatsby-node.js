@@ -47,7 +47,9 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   }
 
   const posts = postsResult.data.allMdx.postsMdx
-  console.log(posts)
+  const tags = postsResult.data.allMdx.tagsGroup
+  const projects = projectsResult.data.allMdx.projectsMdx
+
   posts.forEach(({ node }) => {
     actions.createPage({
       path: node.frontmatter.slug,
@@ -58,10 +60,9 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     })
   })
 
-  const tags = postsResult.data.allMdx.tagsGroup
   tags.forEach(tag => {
     actions.createPage({
-      path: `/tags/${tag.fieldValue.toLowerCase()}/`,
+      path: `/tags/${tag.fieldValue.toLowerCase()}`,
       component: tagTemplate,
       context: {
         tag: tag.fieldValue
@@ -69,7 +70,6 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     })
   })
 
-  const projects = projectsResult.data.allMdx.projectsMdx
   projects.forEach(({ node }) => {
     actions.createPage({
       path: node.frontmatter.slug,

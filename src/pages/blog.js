@@ -9,7 +9,7 @@ const Blog = ({ location }) => {
   const data = useStaticQuery(graphql`
     {
       allMdx(
-        filter: { fileAbsolutePath: { regex: "/^.+/posts/gi" } }
+        filter: { fileAbsolutePath: { regex: "/^.+/posts/i" } }
         sort: { order: DESC, fields: frontmatter___date }
       ) {
         edges {
