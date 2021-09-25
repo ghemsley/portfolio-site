@@ -18,6 +18,7 @@
     "@loadable/component": "^5.15.0",
     "@mdx-js/mdx": "^1.6.22",
     "@mdx-js/react": "^1.6.22",
+    "@playlyfe/gql": "^2.6.2",
     "gatsby": "^4.0.0-zz-next.1",
     "gatsby-plugin-gatsby-cloud": "^4.0.0-zz-next.1",
     "gatsby-plugin-image": "^2.0.0-zz-next.1",
@@ -35,7 +36,9 @@
     "gatsby-remark-external-links": "^0.0.4",
     "gatsby-remark-images": "^6.0.0-zz-next.1",
     "gatsby-remark-prismjs": "^6.0.0-zz-next.1",
+    "gatsby-remark-responsive-iframe": "^4.11.0",
     "gatsby-remark-unwrap-images": "^1.0.2",
+    "gatsby-remark-youtube": "^1.0.1",
     "gatsby-source-filesystem": "^4.0.0-zz-next.1",
     "gatsby-transformer-remark": "^5.0.0-zz-next.1",
     "gatsby-transformer-sharp": "^4.0.0-zz-next.1",
@@ -46,5 +49,10 @@
     "react-helmet-async": "^1.1.2",
     "react-icons": "^4.2.0",
     "sass": "^1.41.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.26.0",
+    "eslint-plugin-react-hooks": "^4.2.0"
   }
 }

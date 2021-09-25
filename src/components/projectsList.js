@@ -1,7 +1,7 @@
 import React from 'react'
 import ProjectCard from './ProjectCard'
 
-const ProjectsList = ({ location, data }) => {
+const ProjectsList = ({ data }) => {
   return (
     <div className='project-grid'>
       {data.allMdx.edges.map(node => {

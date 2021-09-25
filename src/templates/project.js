@@ -1,12 +1,11 @@
-import React from 'react'
 import { graphql } from 'gatsby'
-import { MDXRenderer } from 'gatsby-plugin-mdx'
 import { GatsbyImage } from 'gatsby-plugin-image'
-import { Link } from 'gatsby'
-import { HiOutlineTag } from 'react-icons/hi'
+import { MDXRenderer } from 'gatsby-plugin-mdx'
 import { GatsbySeo } from 'gatsby-plugin-next-seo'
+import React from 'react'
+import { HiOutlineTag } from 'react-icons/hi'
 import Layout from '../components/Layout'
-export default function Project({ location, data }) {
+export default function Project({ data }) {
   return (
     <>
       <GatsbySeo
@@ -39,9 +38,9 @@ export default function Project({ location, data }) {
           </h1>
           <div className='blog-post'>
             <div className='post-metadata'>
-              <time className='blog-post-meta-date'>
-                {data.mdx.frontmatter.date}
-              </time>
+              <p className='blog-post-meta-date'>
+                Created <time>{data.mdx.frontmatter.date}</time>
+              </p>
               <div className='project-tag-container'>
                 {data.mdx.frontmatter.languages.map((language, i) => {
                   return (

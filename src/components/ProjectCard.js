@@ -22,7 +22,7 @@ const ProjectCard = ({ name, slug, languages, date, image, excerpt }) => {
             )
           })}
       </div>
-      <p className='project-date'>Created {date}</p>
+      {/* <p className='project-date'>Created {date}</p> */}
       {image && (
         <Link to={`${slug.toLowerCase()}`}>
           <GatsbyImage

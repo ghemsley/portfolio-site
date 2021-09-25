@@ -23,9 +23,7 @@ module.exports = {
       options: {
         extensions: ['.mdx', '.md'],
         gatsbyRemarkPlugins: [
-          {
-            resolve: 'gatsby-remark-embed-video-lite'
-          },
+          // 'gatsby-remark-responsive-iframe',
           {
             resolve: 'gatsby-remark-images',
             options: {
@@ -39,6 +37,7 @@ module.exports = {
               }
             }
           },
+
           {
             resolve: `gatsby-remark-copy-linked-files`,
             options: {
@@ -57,7 +56,7 @@ module.exports = {
           {
             resolve: 'gatsby-remark-prismjs',
             options: {
-              classPrefix: 'language-',
+              classPrefix: 'code-',
               inlineCodeMarker: '»',
               aliases: {},
               showLineNumbers: true,
@@ -68,21 +67,6 @@ module.exports = {
                 global: false
               },
               escapeEntities: {}
-            }
-          },
-          {
-            resolve: `gatsby-remark-copy-linked-files`,
-            options: {
-              destinationDir: `files`,
-              ignoreFileExtensions: [
-                `png`,
-                `jpg`,
-                `jpeg`,
-                'bmp',
-                'tif',
-                'tiff',
-                'webp'
-              ]
             }
           },
           'gatsby-remark-external-links',

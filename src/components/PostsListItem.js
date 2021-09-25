@@ -17,7 +17,7 @@ const PostsListItem = ({ post }) => {
               </div>
               <div className='tag-container'>
                 {post.frontmatter.tags &&
-                  post.frontmatter.tags.map((tag, i) => {
+                  post.frontmatter.tags.map((tag) => {
                     return (
                       <Link
                         to={`/tags/${tag.name}`.toLowerCase()}

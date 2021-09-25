@@ -1,12 +1,11 @@
-import React from 'react'
-import { graphql } from 'gatsby'
-import { MDXRenderer } from 'gatsby-plugin-mdx'
+import { graphql, Link } from 'gatsby'
 import { GatsbyImage } from 'gatsby-plugin-image'
-import { Link } from 'gatsby'
-import { HiOutlineTag } from 'react-icons/hi'
+import { MDXRenderer } from 'gatsby-plugin-mdx'
 import { GatsbySeo } from 'gatsby-plugin-next-seo'
-import PostNavigator from '../components/postNavigator'
+import React from 'react'
+import { HiOutlineTag } from 'react-icons/hi'
 import Layout from '../components/Layout'
+import PostNavigator from '../components/postNavigator'
 export default function Post({ location, data }) {
   return (
     <>
@@ -44,11 +43,13 @@ export default function Post({ location, data }) {
           </h1>
           <div className='blog-post'>
             <div className='post-metadata'>
-              <time className='blog-post-meta-date'>
-                {data.mdx.frontmatter.date}
-              </time>
+              <p className='blog-post-meta-date'>
+                Published{' '}
+                <time>{data.mdx.frontmatter.date}</time>
+              </p>
+
               <div className='blog-post-tags-container'>
-                {data.mdx.frontmatter.tags.map((tag, i) => {
+                {data.mdx.frontmatter.tags.map(tag => {
                   return (
                     <Link
                       to={`/tags/${tag.name}`.toLowerCase()}
