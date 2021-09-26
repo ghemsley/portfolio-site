@@ -5,7 +5,6 @@ const ProjectsList = ({ data }) => {
   return (
     <div className='project-grid'>
       {data.allMdx.edges.map(node => {
-        console.log(node)
         return (
           <ProjectCard
             key={node.node.id}
@@ -14,7 +13,7 @@ const ProjectsList = ({ data }) => {
             languages={node.node.frontmatter.languages}
             image={node.node.frontmatter.image.childImageSharp.gatsbyImageData}
             date={node.node.frontmatter.date}
-            excerpt={node.node.excerpt}
+            excerpt={node.node.frontmatter.summary}
           />
         )
       })}

@@ -11,7 +11,7 @@ const Index = ({location}) => {
   const data = useStaticQuery(graphql`
     {
       allMdx(
-        filter: { fileAbsolutePath: { regex: "/^.+/projects/gi" } }
+        filter: { fileAbsolutePath: { regex: "/^.+/projects/i" } }
         sort: { order: DESC, fields: frontmatter___date }
       ) {
         edges {
@@ -21,6 +21,7 @@ const Index = ({location}) => {
             frontmatter {
               name
               slug
+              summary
               image {
                 childImageSharp {
                   gatsbyImageData(
@@ -63,7 +64,7 @@ const Index = ({location}) => {
       />
       <Layout>
         <h1 className='page-header'>Projects</h1>
-        <ProjectsList location={location} data={data}/>
+        <ProjectsList data={data}/>
       </Layout>
     </>
   )
