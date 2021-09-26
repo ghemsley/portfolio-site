@@ -11,23 +11,23 @@ summary: A draggable, droppable, reorganizable to-do list app built with React, 
 
 A draggable, droppable, reorganizable to-do list app built with React, Redux, and Ruby on Rails
 
-[Blog post](/posts/designing-a-sortable-todo-list-with-react-and-redux) | [Github repository](https://github.com/ghemsley/project-template-react-rails-api)
+[Live demo](https://tada-todo-list.herokuapp.com/) | [Blog post](/posts/designing-a-sortable-todo-list-with-react-and-redux) | [Github repository](https://github.com/ghemsley/project-template-react-rails-api)
 
-### Features:
+### Features
 
-- RESTful Ruby on Rails API backend with JSONAPI serializer
-- React frontend with Redux as state store
-- JSON Web Token authentication
-- React Router (including nested routes, protected routes)
-- User accounts
-- Full Create-Read-Update-Delete capabilities on models
-- Interactive to-do list management
-- Drag-and-drop capabilities based on React-DnD
-- Custom element position tracking system with debounced updates used to enable drag-and-drop
-- Custom item sorting algorithm to achieve correct item positioning on drop event
-- Persistent sorting of items with batched updates
-- Memoized Redux selectors using Redux-Views for improved performance
-- Memoization of complex components for improved performance
+- **RESTful Ruby on Rails API backend** with **JSONAPI serializer**
+- **React frontend** with **Redux** as state store
+- **JSON Web Token authentication** based on `devise-jwt`
+- **Nested and protected routes** through integration of **React Router**
+- **User accounts** with error feedback upon unsuccessful account creation
+- **Full CRUD** (Create-Read-Update-Delete) capabilities on models
+- **Interactive to-do list management** with **drag-and-drop capabilities** based on `react-dnd`
+- **Custom element position tracking system** with **debounced position updates** used to enable drag-and-drop
+- **Custom item sorting algorithm** to achieve correct item positioning on drop event
+- **Persistent sorting of items** through implementation of **batched updates**
+- **Memoized Redux selectors** using `redux-views` for improved performance
+- **Memoization of complex components** for improved performance
+- Drag-and-drop functionality fully enabled for **touch devices**
 
 
 ![Drag and drop](../assets/images/posts/designing-a-sortable-todo-list-with-react-and-redux/drag-and-drop.gif)
