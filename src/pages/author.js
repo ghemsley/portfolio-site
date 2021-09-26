@@ -34,38 +34,60 @@ const Author = props => {
       />
       <Layout>
         <h1 className='page-header'>Author</h1>
-        <div className='blog-post'>
-          <div className='blog-post-content'>
-            <StaticImage
-              className='author-image'
-              src='../assets/images/pages/author/author.jpg'
-              alt='Picture of Graham Hemsley'
-              placeholder='tracedSVG'
-              width={400}
-            />
-            <h2>Hello!</h2>
-            <p>
-              My name is Graham, and I'm an aspiring web developer currently
-              taking classes to learn more about how to build cool stuff on the
-              web. You've happened upon a blog I maintain so I can document my
-              learning process, mainly for fun and the ability to look back on
-              my growth. I hope you find something interesting while you're
-              here!
-              <br />
-              If you want to know a little more about me, let's see, I like
-              computers, cameras, coding, and coffee, in no particular order. I
-              like practicing photography in my spare time, whenever I get the
-              chance. When I finish with my studies, I hope to someday write
-              software for a nonprofit agency that helps people out in some
-              meaningful way.
-              <br />
-              I'd love to hear from anyone who lands on my blog about coding
-              related stuff, or you can just let me know how the weather is
-              where you live or something if you want. Really! I'd love to hear
-              from you no matter what the topic. If you'd like to get in touch, check out{' '}
-              <Link to='/contact'>the contact page</Link>.
-            </p>
-            <h3>Thanks for stopping by!</h3>
+        <div className='blog-post-container'>
+          <div className='blog-post'>
+            <div className='blog-post-content'>
+              <StaticImage
+                className='author-image'
+                src='../assets/images/pages/author/author.jpg'
+                alt='Picture of Graham Hemsley'
+                placeholder='tracedSVG'
+                width={400}
+              />
+              <h2>Hi there 👋</h2>
+              <h3>You've found my porfolio! 🎉</h3>
+              <p>
+                I'm <strong>Graham Hemsley</strong>, and this is where I display
+                the projects I am most proud of.
+              </p>
+              <p>
+                I am a proud graduate of <strong>Flatiron School</strong> where
+                I studied full-stack software engineering.
+              </p>
+              <p>My main proficiencies include:</p>
+              <ul>
+                <li>React</li>
+                <li>Redux</li>
+                <li>ES6 Javascript</li>
+                <li>Ruby</li>
+                <li>Ruby on Rails</li>
+                <li>ActiveRecord</li>
+                <li>HTML5</li>
+                <li>CSS3</li>
+                <li>MVC architecture</li>
+                <li>RESTful APIs</li>
+                <li>Object-oriented programming</li>
+                <li>Photography</li>
+              </ul>
+              <p>Fun facts about me:</p>
+              <ul>
+                <li>
+                  My first computer ran MS-DOS and apparently came from a
+                  junkyard
+                </li>
+                <li>
+                  My first memory is of booting it up to play a drawing game
+                </li>
+                <li>My first attempt at coding was at age 7</li>
+                <li>My first Ruby program ran when I was 15</li>
+              </ul>
+              <p>
+                Please feel welcome to check out <Link to='/blog'>my blog</Link>{' '}
+                or <Link to='/contact'>contact me</Link> if you'd like to know
+                more about me or my work.
+              </p>
+              <h3>Thank you for stopping by! 🙂</h3>
+            </div>
           </div>
         </div>
       </Layout>
