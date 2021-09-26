@@ -1,0 +1,39 @@
+---
+name: Coffeefinder
+slug: /projects/coffeefinder
+image: ../assets/images/projects/coffeefinder/coffeefinder.png
+languages: ['Ruby', 'GraphQL']
+date: '2020-12'
+summary: A Ruby CLI app for finding nearby coffee shops built with the Yelp GraphQL API
+---
+
+## Coffeefinder
+
+A Ruby CLI app for finding nearby coffee shops built with the Yelp GraphQL API
+
+[Blog post](/posts/when-finding-coffee-gets-complex) | [Github repository](https://github.com/ghemsley/coffeefinder)
+
+### Features
+
+- **Command-line interface** application that utilizes [**Yelp's GraphQL API**](https://www.yelp.com/developers/graphql/guides/intro) as well as [**IP-API**](https://ip-api.com/) to help user find nearby coffeeshops
+- **GraphQL queries** to Yelp API through integration of `graphlient` library
+- **Automatic user location detection** through queries to IP-API
+- **Paginated results display** through integration of `tty-prompt` and `tty-table` libraries
+- Customizable behavior through **CLI options** via `optparse` library with **custom validation of user input**
+- **Colorized result listings** through integration of `colorize` library
+- **Persistent favorites menu** through filesystem storage of JSON-formatted result data
+- **Intuitive menu navigation** through integration of `tty-prompt`
+- **Strong separation of concerns** achieved through **object-oriented programming** and use of Ruby mixins
+
+### Video walkthrough
+
+<div className='youtube-wrapper'>
+  <iframe
+    width='1280'
+    height='800'
+    src='https://www.youtube.com/embed/eeYOinOoiAI'
+    title='YouTube video player'
+    frameborder='0'
+    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+    allowfullscreen></iframe>
+</div>
