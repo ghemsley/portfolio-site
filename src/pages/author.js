@@ -5,7 +5,7 @@ import { Link } from 'gatsby'
 
 import Layout from '../components/Layout'
 
-const Author = props => {
+const Author = () => {
   return (
     <>
       <GatsbySeo

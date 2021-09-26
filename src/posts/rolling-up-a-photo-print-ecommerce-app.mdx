@@ -18,11 +18,9 @@ My latest project at school is one that I was initially a little intimidated by 
 1. At first I misunderstood that the project requirements involved twice as many model relationships as they actually did.
 2. If I am a wizard (I'm not) and Sinatra is a magic scroll (what is this analogy even?), then Ruby on Rails is an entire tome of magic scrolls, and it gives you +1d20 to all intelligence checks while programming. (Nerd level: ∞)
 
-![Abdorazak!](../assets/images/posts/rolling-up-a-photo-print-ecommerce-app/wizard.png)
-
 This metaphor falls apart quickly for those unfamiliar with Dungeons and Dragons, but I guess what I'm trying to say is that Ruby on Rails is a very powerful framework that does a lot of the boring work for you so that you can focus on the more interesting parts of your app's logic right away. 
 
-I had other problems though. What to build? And if meeting the requirements is a 100% effort, how could I give a 110% effort so that I could hopefully be that much more happy with my result?
+I had other problems though. What to build? And how to build it?
 
 ## Reaching for my interests
 
@@ -32,7 +30,7 @@ So then I thought about how to incorporate photography into some kind of project
 
 This had the nice side-effect of giving me a chance to work on something similar to what I might do in an actual software development position, at least the way my silly head imagines it. To my delight, this aspect of my project has lent me an unexpected amount of pride and satisfaction about my efforts. Something about doing a project that feels more 'real' has been very motivating and engaging, even without mentioning the small insights I've gained about building eCommerce applications in practice while stumbling my way towards a finished product.
 
-## Attempting to give a 110% effort
+## How I built my project
 
 I guess my default for these projects has become to look at what is expected, then see how I can bend the rules towards a shape that will allow me to at once maximally learn and grow as a student and developer, have a stupid amount of fun building something, and still check all the boxes of having done (approximately?) what is required, or with some luck a little more. I am very thankful for the flexibility of my school's instructors and curriculum so far, because it has allowed me to really flex my humble muscles of creativity through these projects in ways that have been very gratifying. I really have enjoyed working on these projects a lot.
 
@@ -53,7 +51,7 @@ That was a lot! And like I said, I mistook the second requirement for being doub
 
 ### The Rails portion
 
-Below is a rough pseudocode outline of the models I have created:
+Below is a rough pseudocode outline of the models I created:
 
 ```ruby
 class Admin
@@ -106,7 +104,7 @@ class Quantity
   amount
   
 # There are a few currently unused models in my repo and some of the dimension fields are also currently unused
-# I have left those in in case I expand on the project someday with things like frame options or transaction history
+# I have left those in in case I expand on the project someday with things like frame options
 ```
 
 In addition to a controller for each of those models, I also have controllers for `sessions`, `webhooks`, `searches`, and `home`.

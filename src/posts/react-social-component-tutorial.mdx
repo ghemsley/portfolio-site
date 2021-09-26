@@ -11,7 +11,7 @@ tags:
 date: 2020-10-07
 ---
 
-import Social from "../components/Social"
+import Social from '../components/Social'
 
 ## Hello and welcome!
 
@@ -58,7 +58,7 @@ Duh!
 At the top of your file, type the following.
 
 ```jsx
-import React from "react"
+import React from 'react'
 ```
 
 ##### React-icons
@@ -73,9 +73,9 @@ Finally, import them at the top of your file underneath where we imported React.
 For me, the import statements looked like this:
 
 ```jsx
-import React from "react"
-import { SiGithub, SiLinkedin } from "react-icons/si"
-import { MdMailOutline } from "react-icons/md"
+import React from 'react'
+import { SiGithub, SiLinkedin } from 'react-icons/si'
+import { MdMailOutline } from 'react-icons/md'
 ```
 
 Now we're done getting our dependencies ready!
@@ -96,20 +96,20 @@ But if that's the case, I recommend you check out some of the info about [arrays
 ```jsx
 const socialLinks = [
   {
-    name: "Github",
-    url: "https://github.com/your-profile-here",
-    icon: <SiGithub className="social-link-icon" size={iconSize} />,
+    name: 'Github',
+    url: 'https://github.com/your-profile-here',
+    icon: <SiGithub className='social-link-icon' size={iconSize} />
   },
   {
-    name: "LinkedIn",
-    url: "https://www.linkedin.com/in/your-profile-here",
-    icon: <SiLinkedin className="social-link-icon" size={iconSize} />,
+    name: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/your-profile-here',
+    icon: <SiLinkedin className='social-link-icon' size={iconSize} />
   },
   {
-    name: "Email",
-    url: "mailto:youremail@example.com?subject=Social%20Icons&body=",
-    icon: <MdMailOutline className="social-link-icon" size={iconSize} />,
-  },
+    name: 'Email',
+    url: 'mailto:youremail@example.com?subject=Social%20Icons&body=',
+    icon: <MdMailOutline className='social-link-icon' size={iconSize} />
+  }
 ]
 ```
 
@@ -161,16 +161,15 @@ This component is so simple that it just immediately returns some JSX!
 ```jsx
 const SocialWidget = () => {
   return (
-    <div className="social-links">
+    <div className='social-links'>
       {socialLinks.map(socialObject => {
         return (
           <a
             href={socialObject.url}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="social-link"
-            title={socialObject.name}
-          >
+            rel='noopener noreferrer'
+            target='_blank'
+            className='social-link'
+            title={socialObject.name}>
             {socialObject.icon}
           </a>
         )
@@ -188,7 +187,7 @@ Let's dive in and see what's going on.
 ##### The outer div
 
 ```jsx
-<div className="social-links">...</div>
+<div className='social-links'>...</div>
 ```
 
 This is our outer container for everything else to live inside.
@@ -202,11 +201,10 @@ It's really important that it's a `<div>`! We'll see why when we start styling i
     return (
       <a
         href={socialObject.url}
-        rel="noopener noreferrer"
-        target="_blank"
-        className="social-link"
-        title={socialObject.name}
-      >
+        rel='noopener noreferrer'
+        target='_blank'
+        className='social-link'
+        title={socialObject.name}>
         {socialObject.icon}
       </a>
     )
@@ -255,11 +253,10 @@ Let me do my best to explain, as I understand it (which could totally be off, if
     return (
       <a
         href={socialObject.url}
-        rel="noopener noreferrer"
-        target="_blank"
-        className="social-link"
-        title={socialObject.name}
-      >
+        rel='noopener noreferrer'
+        target='_blank'
+        className='social-link'
+        title={socialObject.name}>
         ...
       </a>
     )
@@ -277,11 +274,10 @@ Let me do my best to explain, as I understand it (which could totally be off, if
     return (
       <a
         href={socialObject.url}
-        rel="noopener noreferrer"
-        target="_blank"
-        className="social-link"
-        title={socialObject.name}
-      >
+        rel='noopener noreferrer'
+        target='_blank'
+        className='social-link'
+        title={socialObject.name}>
         {socialObject.icon}
       </a>
     )
@@ -302,7 +298,7 @@ export default SocialWidget
 From now on we can import our component into any other React component file using
 
 ```jsx
-import SocialWidget from "/src/components/socialWidget"
+import SocialWidget from '/src/components/socialWidget'
 ```
 
 or similar.
@@ -312,42 +308,41 @@ or similar.
 See, that's not so bad! Now let's see our entire component file laid out at once to make sure we have everything right.
 
 ```jsx
-import React from "react"
-import { SiGithub, SiLinkedin } from "react-icons/si"
-import { MdMailOutline } from "react-icons/md"
+import React from 'react'
+import { SiGithub, SiLinkedin } from 'react-icons/si'
+import { MdMailOutline } from 'react-icons/md'
 
 const iconSize = 48
 
 const socialLinks = [
   {
-    name: "Github",
-    url: "https://github.com/your-profile-here",
-    icon: <SiGithub className="social-link-icon" size={iconSize} />,
+    name: 'Github',
+    url: 'https://github.com/your-profile-here',
+    icon: <SiGithub className='social-link-icon' size={iconSize} />
   },
   {
-    name: "LinkedIn",
-    url: "https://www.linkedin.com/in/your-profile-here",
-    icon: <SiLinkedin className="social-link-icon" size={iconSize} />,
+    name: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/your-profile-here',
+    icon: <SiLinkedin className='social-link-icon' size={iconSize} />
   },
   {
-    name: "Email",
-    url: "mailto:youremail@example.com?subject=Social%20Icons&body=",
-    icon: <MdMailOutline className="social-link-icon" size={iconSize} />,
-  },
+    name: 'Email',
+    url: 'mailto:youremail@example.com?subject=Social%20Icons&body=',
+    icon: <MdMailOutline className='social-link-icon' size={iconSize} />
+  }
 ]
 
 const SocialWidget = () => {
   return (
-    <div className="social-links">
+    <div className='social-links'>
       {socialLinks.map(socialObject => {
         return (
           <a
             href={socialObject.url}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="social-link"
-            title={socialObject.name}
-          >
+            rel='noopener noreferrer'
+            target='_blank'
+            className='social-link'
+            title={socialObject.name}>
             {socialObject.icon}
           </a>
         )
@@ -394,27 +389,14 @@ Let's style our component with some CSS.
 
 We can use `display: flex` and related attributes to make our icons arrange themselves nicely in a line.
 Also, just for fun we gave it a whitish glow when the user hovers over the icon using `filter: drop-shadow(0px 0px 8px #d8ebf2)`,
-and it magnifies a little bit on hover too because we added `transform: scale(1.05)`).
+and it magnifies a little bit on hover too because we added `transform: scale(1.05)`.
 Be aware that this method of applying shadows to SVG elements only works in recent browser versions.
 However, what's nice about it is that it accounts for the exact shape of the icon, unlike `box-shadow`.
 Feel free to style your social widget component however you like now that you're a super expert on how to build one. You earned it!
 
 ### A customized example of our component
 
-<div
-  style={{
-    background: "#153259",
-    padding: "16px",
-    borderRadius: "8px",
-    maxWidth: "max-content",
-    margin: "16px",
-    flexBasis: "48px",
-    flexGrow: 0,
-    flexShrink: 1,
-  }}
->
-  <Social iconSize={48} />
-</div>
+<Social iconSize={48} />
 
 And there you have it! A nice little social widget thingy 😇
 

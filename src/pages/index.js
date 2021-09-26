@@ -7,7 +7,7 @@ import ProjectsList from '../components/projectsList'
 
 
 
-const Index = ({location}) => {
+const Index = () => {
   const data = useStaticQuery(graphql`
     {
       allMdx(
