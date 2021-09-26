@@ -26,7 +26,7 @@ const Nav = props => {
         <ul>
           <li key='home'>
             <Link className='nav-button' to='/' title='Home'>
-              Home
+              Projects
             </Link>
           </li>
           {data.allFile.edges.map((page, i) => {

@@ -894,8 +894,8 @@ ul {
 
 .contact-email-card {
   background: white;
-  box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.12),
-    1px 6px 10px rgba(39, 44, 49, 0.06);
+  box-shadow: 0 8px 16px rgba(39, 44, 49, 0.12),
+    0 8px 8px rgba(39, 44, 49, 0.06);
   transition: all ease 250ms;
   padding: 16px;
   border-radius: 8px;
@@ -907,8 +907,8 @@ ul {
   -webkit-font-smoothing: subpixel-antialiased;
   &:hover {
     transition: all ease 250ms;
-    box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.24),
-      1px 6px 10px rgba(39, 44, 49, 0.12);
+    box-shadow: 0 6px 16px rgba(39, 44, 49, 0.24),
+      0 6px 8px rgba(39, 44, 49, 0.12);
     transform: scale(1.0375);
   }
   div {
@@ -1021,26 +1021,26 @@ figcaption {
   flex-wrap: wrap;
   justify-content: space-evenly;
   align-items: center;
-  gap: 2rem;
+  gap: 4rem;
   // grid-template-columns: repeat(2, 1fr);
   // grid-gap: 2rem;
   margin: 2rem;
 }
 
 .project {
-  flex-basis: 320px;
+  flex-basis: 360px;
   flex-grow: 1;
   flex-shrink: 1;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
-  row-gap: 0.5rem;
+  gap: 1rem;
   background: white;
   padding: 2rem;
   box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.12),
     1px 6px 10px rgba(39, 44, 49, 0.06);
   transition: all ease 250ms;
-  border-radius: 8px;
+  border-radius: 4px;
   will-change: transform;
   box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.12),
     1px 6px 10px rgba(39, 44, 49, 0.06);
@@ -1090,7 +1090,7 @@ figcaption {
       max-width: fit-content;
       border-radius: 4px;
       height: fit-content;
-      column-gap: 8px;
+      column-gap: 0.5rem;
       max-height: 20px;
       background-color: #225291;
       font-size: 0.9em;
