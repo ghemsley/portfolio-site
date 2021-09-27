@@ -41,7 +41,7 @@ const Author = () => {
                 className='author-image'
                 src='../assets/images/pages/author/author.jpg'
                 alt='Picture of Graham Hemsley'
-                placeholder='tracedSVG'
+                placeholder='blurred'
                 width={400}
               />
               <h2>Hi there 👋</h2>

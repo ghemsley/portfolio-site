@@ -24,8 +24,8 @@ export default function Project({ data }) {
           images: [
             {
               url: `https://www.grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
-              width: 960,
-              height: 640,
+              width: 1280,
+              height: 720,
               alt: data.mdx.frontmatter.name
             }
           ]
@@ -102,8 +102,8 @@ export const pageQuery = graphql`
           childImageSharp {
             gatsbyImageData(
               layout: CONSTRAINED
-              placeholder: TRACED_SVG
-              width: 1200
+              placeholder: BLURRED
+              width: 800
             )
           }
         }

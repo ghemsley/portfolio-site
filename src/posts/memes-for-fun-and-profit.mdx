@@ -82,11 +82,7 @@ const formData = new FormData()
 formData.append('meme[name]', name)
 formData.append('meme[top_caption]', topCaption)
 formData.append('meme[bottom_caption]', bottomCaption)
-formData.append(
-  'meme[image]',
-  file2,
-  name + `.${file2.type.split('/').pop()}`
-)
+formData.append('meme[image]', file2, name + `.${file2.type.split('/').pop()}`)
 fetch(`/memes/${meme_id}`, {
   method: 'PATCH',
   body: formData
@@ -161,6 +157,6 @@ After uploading my site to Heroku (which in itself was a huge pain), I found out
 
 I had fun building this project (as I hope you can tell). It's not perfect by any means, nor does it have the somewhat more refined code of Coffeefinder. But I like it and am hoping to keep working on it as my time allows. I hope someone gets a kick out of it like I did from the process of making it.
 
-I should mention that you can play around with my app at [its home on Heroku](https://wow-meme-generator.herokuapp.com/). The source code lives at [Github](https://github.com/ghemsley/meme-generator). 
+I should mention that you can play around with my app at [its home on Heroku](https://wow-meme-generator.herokuapp.com/). The source code lives at [Github](https://github.com/ghemsley/meme-generator).
 
 Thanks for reading my silly, silly blog.

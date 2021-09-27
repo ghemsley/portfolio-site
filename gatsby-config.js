@@ -17,6 +17,8 @@ module.exports = {
         icon: 'src/assets/images/icon.png'
       }
     },
+    'gatsby-plugin-sharp',
+    'gatsby-transformer-sharp',
     'gatsby-remark-images',
     {
       resolve: 'gatsby-plugin-mdx',
@@ -27,17 +29,10 @@ module.exports = {
           {
             resolve: 'gatsby-remark-images',
             options: {
-              maxWidth: 800,
-              linkImagesToOriginal: false,
-              showCaptions: true,
-              withWebp: true,
-              tracedSVG: {
-                color: '#153259',
-                turnPolicy: 'TURNPOLICY_MAJORITY'
-              }
+              maxWidth: 1600,
+              showCaptions: true
             }
           },
-
           {
             resolve: `gatsby-remark-copy-linked-files`,
             options: {
@@ -74,8 +69,6 @@ module.exports = {
         ]
       }
     },
-    'gatsby-plugin-sharp',
-    'gatsby-transformer-sharp',
     {
       resolve: 'gatsby-plugin-next-seo',
       options: {

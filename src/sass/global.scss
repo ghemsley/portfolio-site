@@ -803,9 +803,10 @@ pre[class*='language-'] > code {
   will-change: transform;
   box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.12),
     1px 6px 10px rgba(39, 44, 49, 0.06);
-
   transition: all ease 250ms;
-  margin: 2rem;
+  margin-left: 4rem !important;
+  margin-right: 4rem !important;
+  max-width: unset !important;
   &:hover {
     box-shadow: 6px 12px 20px rgba(39, 44, 49, 0.24),
       1px 6px 10px rgba(39, 44, 49, 0.12);
@@ -1264,7 +1265,14 @@ figcaption {
   ul {
     margin-top: 0;
   }
+  * {
+    flex-grow: 1;
+  }
 }
+
+.blog-post-content > p {
+    width: 100%;
+  }
 
 @media (min-width: 1200px) {
   .blog-post-content {
