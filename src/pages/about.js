@@ -27,86 +27,76 @@ const About = props => {
       <Layout>
         <h1 className='page-header'>About</h1>
         <div className='blog-post-container'>
-          <div className='blog-post-content'>
-            <p>
-              This blog is a student project intended to showcase things the
-              author has been learning and doing during their time attending{' '}
-              <a
-                href='https://flatironschool.com/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                Flatiron School
-              </a>
-              , a software engineering bootcamp with locations spanning the
-              United States.
-              <h2>Tech</h2>
-              This blog was built using a bunch of cool technologies, including:
-              <br />
-              <br />
-              <a
-                href='https://nodejs.org/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                NodeJS
-              </a>
-              ,<br />
-              <a
-                href='https://reactjs.org/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                React
-              </a>
-              ,<br />
-              <a
-                href='https://gatsbyjs.com/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                Gatsby
-              </a>
-              ,<br />
-              <a
-                href='https://mdxjs.com/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                MDX
-              </a>
-              ,<br />
-              <a
-                href='https://graphql.org/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                GraphQL
-              </a>
-              ,<br />
-              <a
-                href='https://github.com/oxalorg/sakura'
-                rel='noopener noreferrer'
-                target='_blank'>
-                SakuraCSS
-              </a>
-              ,<br />
-              <a
-                href='https://sass-lang.com'
-                rel='noopener noreferrer'
-                target='_blank'>
-                Sass
-              </a>
-              ,<br />
-              and{' '}
-              <a
-                href='https://www.netlify.com/'
-                rel='noopener noreferrer'
-                target='_blank'>
-                Netlify
-              </a>
-              .
-              <br />
-              <br />
-              The author is sharing stories and information with the hopes that
-              someone will find it useful or interesting. If you have feedback
-              for the author, please don't hesitate to{' '}
-              <Link to='/contact'>reach out</Link>.
-            </p>
+          <div className='blog-post'>
+            <div className='blog-post-content'>
+              <p>
+                This site is a portfolio intended to showcase projects the
+                author has built during their time as a software engineer. There
+                is also a <Link to='/blog'>blog</Link> feature and{' '}
+                <Link to='/author'>a little section about the author</Link> if
+                you want to know more.
+                <h2>Tech</h2>
+                This blog was built using a bunch of cool technologies,
+                including:
+                <br />
+                <a
+                  href='https://nodejs.org/'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  NodeJS
+                </a>
+                ,<br />
+                <a
+                  href='https://reactjs.org/'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  React
+                </a>
+                ,<br />
+                <a
+                  href='https://gatsbyjs.com/'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  Gatsby
+                </a>
+                ,<br />
+                <a
+                  href='https://mdxjs.com/'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  MDX
+                </a>
+                ,<br />
+                <a
+                  href='https://graphql.org/'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  GraphQL
+                </a>
+                ,<br />
+                <a
+                  href='https://github.com/oxalorg/sakura'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  SakuraCSS
+                </a>
+                ,<br />
+                and{' '}
+                <a
+                  href='https://sass-lang.com'
+                  rel='noopener noreferrer'
+                  target='_blank'>
+                  Sass
+                </a>
+                .
+                <br />
+                <br />
+                The author is sharing stories and information with the hopes
+                that someone will find it useful or interesting. If you have
+                feedback for the author, please don't hesitate to{' '}
+                <Link to='/contact'>reach out</Link>.
+              </p>
+            </div>
           </div>
         </div>
       </Layout>

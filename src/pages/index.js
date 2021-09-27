@@ -5,8 +5,6 @@ import { useStaticQuery, graphql } from 'gatsby'
 import Layout from '../components/Layout'
 import ProjectsList from '../components/projectsList'
 
-
-
 const Index = () => {
   const data = useStaticQuery(graphql`
     {
@@ -64,7 +62,7 @@ const Index = () => {
       />
       <Layout>
         <h1 className='page-header'>Projects</h1>
-        <ProjectsList data={data}/>
+        <ProjectsList data={data} />
       </Layout>
     </>
   )

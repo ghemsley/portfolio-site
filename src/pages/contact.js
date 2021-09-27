@@ -26,11 +26,20 @@ const Contact = () => {
       />
       <Layout>
         <h1 className='page-header'>Contact</h1>
-        <p>
-          To get in touch with the author, feel free to send an email, or reach out using one of the social media options on the sidebar.
-        </p>
-        <h2>Email</h2>
-        <EmailCard />
+        <div className='blog-post-container'>
+          <div className='blog-post'>
+            <div className='blog-post-content'>
+              <h2>Get in touch</h2>
+              <p>
+                To get in touch with the author, please feel free to send an
+                email, or you can also reach out using one of the social media
+                options on the dark blue menubar.
+              </p>
+              <h2>Email</h2>
+              <EmailCard />
+            </div>
+          </div>
+        </div>
       </Layout>
     </>
   )
