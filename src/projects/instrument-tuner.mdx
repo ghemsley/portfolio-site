@@ -1,0 +1,43 @@
+---
+name: Instrument Tuner
+slug: /projects/instrument-tuner
+image: ../assets/images/projects/instrument-tuner/cover.png
+languages: ['Javascript', 'Rails', 'Ruby', 'HTML', 'CSS']
+date: '2021-08'
+summary: A customizable instrument tuner built with Ruby on Rails and Javascript
+---
+
+## Instrument Tuner
+
+A customizable instrument tuner built with Ruby on Rails and Javascript
+
+[Blog post](/posts/getting-in-tune-with-rails-and-js) | [Frontend repository](https://github.com/ghemsley/instrument-tuner-frontend) | [Backend repository](https://github.com/ghemsley/instrument-tuner-backend)
+
+### Features
+
+- RESTful API backend built with Ruby on Rails
+- Vanilla ES6 Javascript SPA frontend with 100% JS-generated page elements
+- Realtime tuning display with indicator showing proximity to a given pitch
+- Feedback shows whether you are hitting the correct pitches within a given tuning
+- Can create custom instrument definitions through HTML5 forms
+- Can create custom tuning definitions for each available instrument
+- Automatic instrument image fetching powered by Unsplash API
+- Uses HTML5 Webaudio API to obtain user microphone input
+- Audio frequency detection powered by `pitchfinder` library
+- Custom algorithm translates detected frequencies to musical notes in realtime
+- Full CRUD (Create-Read-Update-Delete) functionality on models
+- Database-backed persistence of created instruments and tunings
+- Validations in case of incorrect form submission
+
+### Video walkthrough
+
+<div className='youtube-wrapper'>
+  <iframe
+    width='1280'
+    height='784'
+    src='https://www.youtube.com/embed/TP4heLkpbTQ'
+    title='YouTube video player'
+    frameborder='0'
+    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+    allowfullscreen></iframe>
+</div>
