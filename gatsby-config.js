@@ -3,7 +3,7 @@ module.exports = {
     title: 'Portfolio',
     description: 'A development portfolio by Graham Hemsley',
     author: 'Graham Hemsley',
-    siteUrl: 'https://www.grahamhemsley.com'
+    siteUrl: 'https://grahamhemsley.com'
   },
   plugins: [
     'gatsby-plugin-sass',
@@ -79,16 +79,16 @@ module.exports = {
         description: 'A development portfolio by Graham Hemsley',
         openGraph: {
           type: 'website',
-          title: 'Blog',
+          title: 'Portfolio',
           locale: 'en_US',
           site_name: 'Portfolio',
-          url: 'https://www.grahamhemsley.com/',
+          url: 'https://grahamhemsley.com',
           description: 'A development portfolio by Graham Hemsley',
           images: [
             {
-              url: 'https://www.grahamhemsley.com/preview.jpg',
+              url: 'https://grahamhemsley.com/preview.jpg',
               width: 1280,
-              height: 720,
+              height: 800,
               alt: 'Preview of a development portfolio by Graham Hemsley'
             }
           ]

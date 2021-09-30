@@ -14,7 +14,7 @@ const Author = () => {
         openGraph={{
           title: 'Author',
           description: 'About Graham Hemsley',
-          url: 'https://www.grahamhemsley.com/author',
+          url: 'https://grahamhemsley.com/author',
           type: 'profile',
           profile: {
             firstName: 'Graham',
@@ -24,7 +24,7 @@ const Author = () => {
           },
           images: [
             {
-              url: 'https://www.grahamhemsley.com/author.jpg',
+              url: 'https://grahamhemsley.com/author.jpg',
               width: 480,
               height: 480,
               alt: 'Photo of Graham Hemsley'

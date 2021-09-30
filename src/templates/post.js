@@ -16,10 +16,10 @@ export default function Post({ location, data }) {
           type: 'article',
           title: data.mdx.frontmatter.title,
           description: data.mdx.frontmatter.excerpt,
-          url: `https://www.grahamhemsley.com${data.mdx.frontmatter.slug}`,
+          url: `https://grahamhemsley.com${data.mdx.frontmatter.slug}`,
           article: {
             publishedTime: data.mdx.frontmatter.date,
-            authors: [`https://www.grahamhemsley.com/author`],
+            authors: [`https://grahamhemsley.com/author`],
             tags: [
               ...data.mdx.frontmatter.tags.map(tag => {
                 return tag.name
@@ -28,7 +28,7 @@ export default function Post({ location, data }) {
           },
           images: [
             {
-              url: `https://www.grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
+              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
               width: 1280,
               height: 720,
               alt: data.mdx.frontmatter.title

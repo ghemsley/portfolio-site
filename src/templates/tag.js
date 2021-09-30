@@ -18,16 +18,16 @@ export default function Tag({ location, pageContext, data }) {
         openGraph={{
           title: tag,
           description: `Posts tagged with ${tag}`,
-          url: `https://www.grahamhemsley.com${location.pathname}`,
+          url: `https://grahamhemsley.com${location.pathname}`,
           article: {
-            authors: ['https://www.grahamhemsley.com/author'],
+            authors: ['https://grahamhemsley.com/author'],
             tags: [tag]
           },
           images: [
             {
-              url: `https://www.grahamhemsley.com/preview.jpg`,
+              url: `https://grahamhemsley.com/preview.jpg`,
               width: 1280,
-              height: 720,
+              height: 800,
               alt: 'A development portfolio by Graham Hemsley'
             }
           ]

@@ -53,13 +53,13 @@ const Blog = ({ location }) => {
           title: 'Blog',
           locale: 'en_US',
           site_name: 'Portfolio',
-          url: 'https://www.grahamhemsley.com/blog',
+          url: 'https://grahamhemsley.com/blog',
           description: 'A development blog by Graham Hemsley',
           images: [
             {
-              url: 'https://www.grahamhemsley.com/preview.jpg',
+              url: 'https://grahamhemsley.com/preview.jpg',
               width: 1280,
-              height: 720,
+              height: 800,
               alt: 'Preview of a development portfolio by Graham Hemsley'
             }
           ]

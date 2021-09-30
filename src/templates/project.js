@@ -15,15 +15,15 @@ export default function Project({ data }) {
           type: 'article',
           title: data.mdx.frontmatter.name,
           description: data.mdx.excerpt,
-          url: `https://www.grahamhemsley.com${data.mdx.frontmatter.slug}`,
+          url: `https://grahamhemsley.com${data.mdx.frontmatter.slug}`,
           article: {
             publishedTime: data.mdx.frontmatter.date,
-            authors: [`https://www.grahamhemsley.com/author`],
+            authors: [`https://grahamhemsley.com/author`],
             tags: [...data.mdx.frontmatter.languages]
           },
           images: [
             {
-              url: `https://www.grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
+              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
               width: 1280,
               height: 720,
               alt: data.mdx.frontmatter.name

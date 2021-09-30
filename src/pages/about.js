@@ -13,13 +13,13 @@ const About = props => {
         openGraph={{
           title: 'About',
           description: 'About this site',
-          url: 'https://www.grahamhemsley.com/about',
+          url: 'https://grahamhemsley.com/about',
           images: [
             {
-              url: `https://www.grahamhemsley.com/preview.jpg`,
+              url: `https://grahamhemsley.com/preview.jpg`,
               width: 1280,
-              height: 720,
-              alt: 'A blog by Graham Hemsley'
+              height: 800,
+              alt: 'A portfolio by Graham Hemsley'
             }
           ]
         }}

@@ -13,12 +13,12 @@ const Contact = () => {
         openGraph={{
           title: 'Contact',
           description: 'How to contact the author',
-          url: 'https://www.grahamhemsley.com/contact',
+          url: 'https://grahamhemsley.com/contact',
           images: [
             {
-              url: `https://www.grahamhemsley.com/preview.jpg`,
+              url: `https://grahamhemsley.com/preview.jpg`,
               width: 1280,
-              height: 720,
+              height: 800,
               alt: 'A development portfolio by Graham Hemsley'
             }
           ]
