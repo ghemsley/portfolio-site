@@ -1,0 +1,962 @@
+---
+title: Basic API Auth with AdonisJS and React
+author: Graham Hemsley
+slug: /posts/basic-api-auth-with-adonis-and-react
+image: ../assets/images/posts/basic-api-auth-with-adonis-and-react/cover.png
+featured: true
+tags:
+  - name: Programming
+  - name: Typescript
+  - name: AdonisJS
+  - name: NextJS
+  - name: React
+date: 2021-10-28
+---
+
+## Hello!
+
+I was recently trying to plan a project to work on so I could keep my skills sharp and learn some new stuff. Searching for something new to try, I came across a very cool backend framework inspired by the likes of Ruby on Rails. It's called AdonisJS, and if you want to get a sense of what it's like to work with, it's basically as if Rails and NodeJS got smushed together into a big ball of Typescript. Loving the sound of it, I decided to try it out. 
+
+I opted to pair it with a Next.js frontend, and knowing me of course I had to try and hodgepodge in GraphQL as well. With those tools in my belt, I set off to make a new app: Da da da daaa! Mood Tracker! But that's not what this post is about at all actually. Instead I wanted to share some stuff I came up with so far regarding authentication that I hope will be useful to someone.
+
+## Creating a token authentication system
+
+AdonisJS is quite handy in that like Rails, it supports serving data as an API in addition to providing facilities for server-side-rendered views. So I decided to build my app using AdonisJS as an API. Once I had some basic models set up I needed to start working on the authentication system. Adonis has some nice built-in functionality based around *Opaque Access Tokens* that makes generating a token quite simple. But it doesn't quite explain how to go about integrating its token authentication system with a frontend, and I didn't see much like that out there elsewhere. So, I thought I would explain the solution I came up with in case others need to do something similar.
+
+Bear in mind that, since this is a post about a semi-homegrown auth system by someone who is not an actual security researcher or whatever, you should first immediately destroy your computer for the transgression of loading this unholy blog post into memory, and secondly burn its remains with the cleansing fires of the nearest fusion reactor. Because rolling your own auth properly is difficult 😅
+
+Once you're done with that, if the screen still happens to render this page despite all the atomization (sub-atomization?) it just went through, then I suppose it was meant to be. In that case, feel free to read on! But please don't put any of this code into any important production systems.
+
+### First steps
+
+Before you continue, note that this post will assume you have a Typescript React-based frontend along with AdonisJS setup as an API already. I am using NextJS for my frontend, but the code should be easily adaptable to create-react-app or similar. 
+
+I used the AdonisJS auth configurator to create my user model and migrations, so it assumes you've done that too. 
+
+Also, In my Next.js frontend, I set up Redux according to [the Next.js example on Redux with Thunk](https://github.com/vercel/next.js/tree/canary/examples/with-redux-thunk) already, so be sure you've done something similar. 
+
+This guide additionally assumes the use of Redis as the token storage provider ([docs link here](https://docs.adonisjs.com/guides/redis)). If you need any help with any of that or want to adapt this info to a different setup, I recommend poking around in general at [the AdonisJS documentation](https://docs.adonisjs.com/guides/introduction) before you try implementing things from this post.
+
+### Authentication and authorization routes
+
+Once the basics are all set up, we can begin by defining some routes in the `./start/routes.ts` file where AdonisJS looks for route definitions. This assumes some familiarity with AdonisJS so check out the [AdonisJS routing documentation](https://docs.adonisjs.com/guides/routing) or [their API authentication info](https://docs.adonisjs.com/guides/auth/api-tokens-guard) if there's something you don't quite get just yet:
+
+```typescript
+Route.get('/authorize', async ({ auth }) => {
+  const user = await auth.use('api').authenticate()
+  return JSON.stringify({
+    user,
+  })
+})
+
+Route.post('/signup', async ({ auth, request }) => {
+  const email = request.input('email')
+  const password = request.input('password')
+  const confirmPassword = request.input('confirmPassword')
+  if (password === confirmPassword) {
+    if (!(await User.findBy('email', email))) {
+      const user = await User.create({ email, password })
+      const { token } = await auth.use('api').generate(user, { expiresIn: '1day' })
+      const userWithAllData = await User.find(user.id) // user doesn't come with all its default fields unless we do this
+      return JSON.stringify({
+        user: userWithAllData,
+        token,
+      })
+    } else return { errors: [{ message: 'Email is taken' }] }
+  } else return { errors: [{ message: 'Passwords do not match' }] }
+})
+
+Route.post('/login', async ({ auth, request }) => {
+  const email = request.input('email')
+  const password = request.input('password')
+  const result = await auth.use('api').attempt(email, password, { expiresIn: '1day' })
+  const { user, token } = result
+  return JSON.stringify({
+    user,
+    token,
+  })
+})
+
+Route.get('/logout', async ({ auth }) => {
+  const result = await auth.use('api').authenticate()
+  await auth.use('api').revoke()
+  return JSON.stringify({
+    token: 'revoked',
+  })
+})
+```
+
+#### Bonus tidbit: Simple way of handling dates coming from AdonisJS
+
+While setting up AdonisJS, I came across a way to make dates a little easier to parse (IMO) than what it defaults to out of the box. I find it easier to work with date/time objects if they are already converted to an integer representing milliseconds from the ECMAScript epoch in UTC. If you want an easy way to handle parsing those DateTime objects, try adding this to your `createdAt` and `updatedAt` column definitions in your AdonisJS user model: 
+
+```typescript
+consume: (value: DateTime) => {
+  return value.valueOf()
+}
+```
+
+So for me, the full `createdAt` column definition in my User model looks like this: 
+
+```typescript
+@column.dateTime({
+    autoCreate: true,
+    consume: (value: Date) => {
+      return value.valueOf()
+    },
+  })
+  public createdAt: DateTime
+```
+
+This code will send the DateTime object as a number instead of as a string, which you can then parse easily using [the browser's builtin Date class](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) on the frontend. It also allows for easy comparison between different dates: just use the greater than or less than operators to see which date is earlier or later.
+
+### Redux
+
+Hopefully you are familiar with Redux a little bit already. Not because it's important, but because I don't want to try to get you through the pain that is trying to comprehend a full Redux setup for the first time all by myself. If you need help, check out [the Redux documentation](https://redux.js.org/introduction/getting-started). It's pretty good.
+
+#### Action creators
+
+Now let's define some [action creators](https://redux.js.org/usage/reducing-boilerplate#action-creators) that will let us dispatch the actions we need for our Redux reducers. This will let us create copies of the data from the backend in our frontend's Redux state during our authentication process:
+
+```typescript
+export type UserActionType = {
+  type: 'SET_AUTHENTICATED' | 'SET_UNAUTHENTICATED'
+  payload?: UserObject
+}
+
+export const users = {
+  setAuthenticated:
+    (payload: UserObject) =>
+    (dispatch: ThunkAppDispatch): Promise<UserActionType> =>
+      Promise.resolve(dispatch({ type: 'SET_AUTHENTICATED', payload })),
+
+  setUnauthenticated:
+    () =>
+    (dispatch: ThunkAppDispatch): Promise<UserActionType> =>
+      Promise.resolve(dispatch({ type: 'SET_UNAUTHENTICATED' })),
+}
+```
+
+Your types will probably need to differ from mine somewhat, so I'm not going to share every little type definition in my app. But here's an example of my UserObject type just in case you need an example to get you started: 
+
+```typescript
+export type UserObject = {
+  id?: number | null
+  email?: string | null
+  admin?: boolean | null
+  createdAt?: number | null
+  updatedAt?: number | null
+}
+```
+
+#### User reducer
+
+Now let's create a [reducer](https://redux.js.org/usage/structuring-reducers/structuring-reducers) that will handle our authentication actions once they are dispatched:
+
+```typescript
+type UserStateType = {
+  currentUser: UserObject | null
+}
+
+const user = (
+  state: UserStateType = {
+    currentUser: null,
+  },
+  action: {
+    type: 'SET_AUTHENTICATED' | 'SET_UNAUTHENTICATED'
+    payload?: UserObject
+  }
+): UserStateType => {
+  switch (action.type) {
+    case 'SET_AUTHENTICATED':
+      return {
+        currentUser: action?.payload,
+      }
+    case 'SET_UNAUTHENTICATED':
+      return {
+        currentUser: null,
+      }
+
+    default:
+      return state
+  }
+}
+```
+
+### Authentication functionality
+
+Great! Now that Redux is set up with our actions and our reducer, let's take a look at creating some custom hooks that will make our API authentication requests and handle dispatching our actions in one go.
+
+#### Helper functions
+
+To create our hooks, let's make some reusable functions and store them as methods in a `helpers` object:
+
+```typescript
+const helpers = {
+  setToken: (token: string): void => {
+    localStorage.setItem('token', token)
+  },
+  
+  getToken: (): string | null => {
+    return localStorage.getItem('token')
+  },
+    
+  deleteToken: (): void => {
+    localStorage.removeItem('token')
+  },
+    
+  auth: (): Headers => new Headers({ Authorization: `Bearer ${helpers.getToken()}` }),
+    
+  fetcher: (
+    url: string,
+    method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE',
+    auth: boolean,
+    body?: Record<string, any> | undefined
+  ): Promise<Record<string, any>> => {
+    const token = auth ? helpers.getToken() : null
+    return fetch(constants.API + url, {
+      method,
+      mode: 'cors',
+      headers:
+        auth && token
+          ? new Headers({
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            })
+          : new Headers({
+              'Content-Type': 'application/json',
+            }),
+      body: body ? JSON.stringify(body) : undefined,
+    })
+      .then(response => response.json())
+      .catch(error => error)
+  },
+}
+```
+
+The first few should be pretty simple: They just set or get or delete a token form the browser's local storage. I don't care that some people say localStorage is not the optimal place for a token, I'm in a hurry! And for the purposes of this post it works for now. But do be aware that there are maybe better places to put tokens if you want to try building a production-ready authentication system at some point.
+
+The `auth` method just creates a `Headers` instance that contains our authentication token in the correct header with the correct formatting. Don't ask me why it's gotta be like that, but *it do*. 
+
+The last method is a bit more involved if you've never used `fetch` too much. If that's you, what are you waiting for? Go [play `fetch` a little](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and come back when you're all tuckered out. Fetch is great, and since it lives in the browser there are no imports needed!
+
+Anyway, it's not too complicated if you are used to using `fetch`. This function let's us pass in a url, method, a boolean indicating whether to include authentication headers or not, and optionally a request body if we are using a method that requires one. Then it returns a JSONified response body, or an error. Nice!
+
+#### Check authentication status functionality
+
+##### useCheckAuth hook
+
+Now let's create the hooks themselves, which is what this post is mainly about. Let's start in order of simplest to most complex. Here goes our first hook, the `useCheckAuth` hook:
+
+````typescript
+export type ErrorType = {
+  errors: { message: string }[]
+}
+export type AuthenticationType = {
+  user: UserObject
+  token: string
+}
+
+useCheckAuth: (): HookReturnType => {
+  const user = useSelector(state => state.user.currentUser)
+  const [data, setData] = useState<(AuthenticationType & ErrorType) | null>(null)
+  const [errors, setErrors] = useState<ErrorType['errors'] | null>(null)
+  const dispatch: ThunkAppDispatch = useDispatch()
+  const mounted = usePromise()
+  const isMounted = useMountedState()
+  const authorize = useCallback((url: string) => helpers.fetcher(url, 'GET', true), [])
+  const run = useCallback(async () => {
+    const data = (await mounted(authorize('/authorize'))) as AuthenticationType & ErrorType
+    if (typeof data?.token === 'string') {
+      helpers.setToken(data.token)
+    }
+    if (isUserObject(data?.user)) {
+      if (!user && isMounted()) await mounted(dispatch(actions.setAuthenticated(data.user)))
+      if (isMounted()) setData(data)
+    } else {
+      console.log('error', data)
+      helpers.deleteToken()
+      if (isMounted()) await mounted(dispatch(actions.setUnauthenticated()))
+      if (isMounted()) setErrors(data?.errors ? data.errors : null)
+    }
+  }, [user, isMounted, dispatch, mounted, authorize])
+  useEffect(() => {
+    if (isMounted()) mounted(run())
+  }, [])
+  return [data, errors]
+}
+````
+
+Since this is probably the most complex thing here so far, let's walk through it, step by excruciating step. Just kidding! I love coding; hopefully you do too!
+
+###### Types
+
+First we set up some types to let our editor know what's what:
+
+```typescript
+export type ErrorType = {
+  errors: [{ message: string }]
+}
+
+export type AuthenticationType = {
+  user: UserObject
+  token: string
+}
+```
+
+###### Defining some variables and functions
+
+Next, inside our hook, we create some functions and variables for later use:
+
+```tsx
+const user = useSelector(state => state.user.currentUser)
+const [data, setData] = useState<(AuthenticationType & ErrorType) | null>(null)
+const [errors, setErrors] = useState<ErrorType['errors'] | null>(null)
+const dispatch: ThunkAppDispatch = useDispatch()
+const mounted = usePromise()
+const isMounted = useMountedState()
+const authorize = useCallback((url: string) => helpers.fetcher(url, 'GET', true), [])
+```
+
+For this hook, we can first grab a copy of the data in our Redux store that pertains to a user so we can later tell if we have created a user and dispatched our action successfully. Whenever the global state referred to by the  `user`  variable changes, our variable will automatically update with a copy of the updated state. 
+
+Next, we create two little bits of local state, `data` and `errors`, along with setter functions to let us update their values later. We can't just use `let data` and `let errors` because later on we will be changing their values from inside of a useEffect call, which is a no-no. Inside of a useEffect, if we changed their values then the new values would be lost at the next render call of our component that we call the hook in, and we don't want that. So instead we will use local state which will prevent this behavior.
+
+After that we grab a `dispatch` function from `useDispatch` so that we can dispatch an action inside of our hook to send to our reducer, which will then update our Redux store with the result of our API call.
+
+The next two functions that we define come from a handy library called `react-use`: `mounted` comes from `usePromise`, which returns a function that resolves a promise so long as the component we run our hook in is still mounted.
+
+Similarly, `isMounted` comes from `useMountedState` which returns a function that handily informs us whether our component is mounted by returning a simple boolean value.
+
+Why use these functions? While not strictly *necessary*, they prevent us from running into memory leaks or other weird behavior if our component for some reason unmounts during the resolution of a promise or while attempting to update our component's state. React will throw errors about this if you run into it, which I did before adding those functions into the mix.
+
+If you prefer to avoid third-party code, you can achieve similar results by adding an extra `useEffect` call that sets the `.current` property of a  `ref` created by `useRef` to a boolean in the function inside the return statement of the function provided as the first argument to `useEffect` . (That's hard to sum up!) Something like this: 
+
+```tsx
+const unmounting = useRef(false)
+useEffect(() => {
+  return (() => {
+    unmounting.current = true
+  })
+})
+```
+
+You can then use `if` statements to conditionally update state depending on the value of `unmounting.current`. I prefer the handy utilities from `react-use` so as not to litter my code with as much trivial stuff, but certainly have at it if it's what you like better.
+
+Finally we create another function that returns our `fetcher` helper method called with the correct arguments. I am doing this mainly for readability, as the stuff inside of parentheses gets a bit long otherwise.
+
+###### Our main logic async function
+
+```tsx
+ const run = useCallback(async () => {
+  const data = await mounted(authorize('/authorize'))
+  if (typeof data?.token === 'string') {
+    helpers.setToken(data.token)
+  }
+  if (isUserObject(data?.user)) {
+    if (!user && isMounted()) await mounted(dispatch(actions.setAuthenticated(data.user)))
+    if (isMounted()) setData(data)
+  } else {
+    console.log('error', data)
+    helpers.deleteToken()
+    if (isMounted()) await mounted(dispatch(actions.setUnauthenticated()))
+    if (isMounted()) setErrors(data?.errors ? data.errors : null)
+  }
+}, [user, isMounted, dispatch, mounted])
+```
+
+Now we work on the main logic for our hook. First we wrap an async function inside useCallback to reduce the amount of times it will have to be recomputed when the component renders. It should only get recomputed if one of its dependencies change. Those dependencies are what you see in the array provided as a second argument to `useCallback` at the bottom of the code block.
+
+We have made this function async primarily for convenience. Doing so converts its return value(s) into a `Promise` that represents the eventual completion of the function, assuming it doesn't throw some strange error during runtime. With this `Promise` we can use the `await` keyword along with methods like `.then()` to do something after our fetch request and associated logic is complete. In this hook, we don't need to worry about the return of `run()` so much, but it is handy to have the concise `await` syntax available to wait for our fetch request to return a value, so why not.
+
+Next we call the  `authorize` function we just made earlier. Note the use of the `await` keyword: This means we should wait for our helper function to finish its fetch request and grab the value inside of the `Promise` it returns before letting anything else execute inside our containing async function.
+
+We assign the awaited result of that promise to the variable `data`, then we check to see what was returned. If we happen to get a user object back, it means we can probably go ahead and dispatch an action with that user object as the payload to save our user's info to our Redux state for later use. It also means we can use our `setData` function to save that `data` variable in a way that will be accessible later on when we want to return it from our outer custom hook.
+
+Conversely, if we didn't get a user object back, we can probably assume something went wrong, so for now we can just `console.log()` whatever we got back from our request and dispatch a `SET_UNAUTHENTICATED` action using our action creator we defined earlier after first ensuring that the user's token is deleted from local storage (since it is most likely invalid anyway). 
+
+We also want to save the `errors` property from our `data` variable if it exists, since we know that's how we defined our route responses in AdonisJS earlier and the existence and content of the errors property could come in handy later (not as much for this hook as the others coming up, which we will see soon).
+
+The last part of our `run()` function definition is the dependency array we mentioned before. We have to be careful to specify each dependency it relies on completely for it to work right. Otherwise, something could change and `useCallback` won't update our function correctly.
+
+###### useEffect
+
+```typescript
+useEffect(() => {
+  if (isMounted()) mounted(run())
+}, [])
+
+return [data, errors]
+```
+
+Finally, we employ the `useEffect` hook to let us run our handy `run()` function as soon as our component is mounted. Specifying an empty dependency array means that it will only run on the first render. For this hook, that's what we want!
+
+Inside `useEffect`, we just have a one-liner to deal with. Essentially, if the component is currently mounted, we execute the `run()` function if and while the component is still mounted and halt it if at anytime it happens to unmount.
+
+###### Finally done with our hook
+
+For this hook, we lastly return the local state variables we created earlier: 
+
+`return [data, errors]`
+
+And then we're done! (After closing our braces, of course.)
+
+###### Phew!
+
+Now that all that's out of the way, let's look at a component and see how we will actually be using the hook we've made. I think you will agree, our work paid off!
+
+##### Auth component
+
+Now I will show you the authentication wrapper component (and constituent friends) that I built to essentially create a basic protected routes system.
+
+###### Redirect component
+
+Firstly, in order to redirect on a failed authentication check, I opted to create a `Redirect` component that redirects immediately on mount to a location specified by its provided props:
+
+```tsx
+import { useRouter } from 'next/router'
+import { FunctionComponent, memo } from 'react'
+import { Loader } from 'rsuite'
+
+interface Props {
+  to: string
+}
+
+const Redirect: FunctionComponent<Props> = memo(({ to }) => {
+  const router = useRouter()
+  useEffect(() => {
+    router.push(to)
+  }, [])
+  return <Loader center size="lg" content="Redirecting..." />
+})
+
+Redirect.displayName = 'Redirect'
+
+export default Redirect
+
+```
+
+You might notice what I am importing first. I am using a `Loader` component from the component library `rsuite` (aka [React Suite](https://rsuitejs.com/)) to show a loading spinner while redirecting. You will see many more uses of `rsuite` throughout this guide, so feel free to check it out if you would like to follow along. However, everything you see can be done simply enough with standard  `React`; never fear. I just like its default styling better for whipping stuff up quickly.
+
+You may also notice that in order to redirect, I am making use of `next/router`. There are plenty of simple ways to redirect in standard React as well, so try a good old internet search if you aren't using Next.js and you don't know what else to do here.
+
+Note that I am memoizing the component as well, using the imported function `memo`. I tend to do this by default, as I have learned that there is next to no performance penalty (if anything, you will see performance gains), and more importantly it tends to prevent react from habitually re-rendering the component at least 50 trillion times per split-second in the case that you are actually doing something worthwhile inside of it. (I am being a little mean, but really, React has some work to do on its rendering system if you ask me.)
+
+Now let's look further down at the code. 
+
+```tsx
+const Redirect: FunctionComponent<Props> = memo(({ to }) => {
+  const router = useRouter()
+  useEffect(() => {
+    router.push(to)
+  }, [])
+  return <Loader center size="lg" content="Redirecting..." />
+})
+```
+
+
+
+After destructuring a prop and wrapping our component with `memo`, we obtain a copy of the `router` object that Next.js provides, then we call it's `.push` method inside of a `useEffect hook`, and redirect our user to the location specified by the prop `to`.
+
+Then we return an instance of the  `Loader` component from `rsuite` so that while this component is doing its thing, we see some helpful progress info.
+
+And that's it for the redirect component. Yay!
+
+###### The Auth component itself
+
+```tsx
+const Auth: FunctionComponent = memo(({ children }) => {
+  const [data, errors] = apiHooks.useCheckAuth()
+  return data?.user ? (
+    <>{children}</>
+  ) : errors ? (
+    <Redirect to="/login" />
+  ) : (
+    <Loader size="lg" center content="authenticating..." />
+  )
+})
+```
+
+###### Explanation
+
+This component conditionally renders either its own children, a `Redirect` component, or a loading marker. Again here I used the loading spinner from React Suite as the loading marker, but you could just return a basic `<p>` tag or something like that if you prefer. 
+
+We can see in our component that if `data` exists and has a **truthy** property `.user`, it will allow its own children to render. If that condition is met, everything probably went fine and our user can go off to the greener pastures of our  webapp's authenticated routes.
+
+If that condition is not met, it may instead redirect the user if `errors` exists and is truthy. We can assume in that case that there was an error during our hook call, probably meaning that the user was not logged in yet and thus didn't have a token stored, or that their token has expired already. 
+
+If neither condition is met, we can assume that our hook simply hasn't finished running yet (or perhaps something went horrifically wrong in an existential H.P. Lovecraft sort of way so we should hangup our web development hats and retire our aspirations of doing anything more interesting with a keyboard than being a simple data entry associate forevermore. But let's be optimists for today!).
+
+So in that case we just show the loading spinner.
+
+In any case, since this component only lets its children render under that one condition, it essentially lets you create a protected route by wrapping other components with itself. Let's see an example!
+
+```tsx
+const Layout: React.FunctionComponent = memo(({ children }) => {
+  const currentUser = useSelector(state => state.user.currentUser)
+  const router = useRouter()
+  const protectedRoutes = new Set(['/calendar', '/logout'])
+  return (
+    <Container>
+      <Header>
+        <Navbar appearance="inverse">
+          <Nav>
+            <Nav.Item as={NavLink} href="/">
+              Home
+            </Nav.Item>
+            {currentUser ? (
+              <>
+                <Nav.Item as={NavLink} href="/calendar">
+                  Calendar
+                </Nav.Item>
+                <Nav.Item as={NavLink} href="/logout">
+                  Log out
+                </Nav.Item>
+              </>
+            ) : (
+              <>
+                <Nav.Item as={NavLink} href="/login">
+                  Log in
+                </Nav.Item>
+                <Nav.Item as={NavLink} href="/signup">
+                  Sign up
+                </Nav.Item>
+              </>
+            )}
+          </Nav>
+        </Navbar>
+      </Header>
+      <Content>{protectedRoutes.has(router.pathname) ? <Auth>{children}</Auth> : children}</Content>
+      <Footer>Footer</Footer>
+    </Container>
+  )
+})
+```
+
+So what's going on here?
+
+Aside from not wanting to leave you without a scaffold of some kind to use as your layout in case you are trying to test my code out quickly, I am showing this so you can see a couple key things: The part near the top where I create a `Set` to store my protected route pathnames, and the part at the bottom where I conditionally render the `Auth` component we saw before to wrap the children of the layout if (and only if) the current route matches one of our protected pathnames. 
+
+There is a reason I am doing it this way instead of wrapping everything in a page component's render call with our `Auth` component. If you were to do it that no good, ugly, *other* way, instead of the nice, happy way I showed you just above, you would find that the authentication route of your AdonisJS server would get hit a little more often than you might want as React spams the render calls it loves so much, authenticating and re-authenticating with each of your user's interactions with the page. We don't want that!
+
+Anyway, this `Auth` component should now work for us to disallow access to certain routes or data we don't want users accessing unless they are logged in. Huzzah!
+
+Well, you probably see the problem. First they need to be able to login! And logout! And to do that they need to be able to sign up! 
+
+No worries, I've got you covered 😁
+
+#### Signup functionality
+
+##### useSignupUser hook
+
+```typescript
+useSignupUser: async (
+  email: string,
+  password: string,
+  confirmPassword: string,
+  start: boolean,
+  setErrors: Dispatch<ErrorType['errors'] | null>
+): Promise<HookReturnType> => {
+  const [data, setData] = useState<(AuthenticationType & ErrorType) | null>(null)
+  const dispatch: ThunkAppDispatch = useDispatch()
+  const mounted = usePromise()
+  const isMounted = useMountedState()
+  const signupUser = useCallback(
+    (url: string) => helpers.fetcher(url, 'POST', false, { email, password, confirmPassword }),
+    [confirmPassword, email, password]
+  )
+  const run = useCallback(async (): Promise<
+    [(AuthenticationType & ErrorType) | null, ErrorType['errors'] | null]
+  > => {
+    const data = (await mounted(signupUser('/signup'))) as AuthenticationType & ErrorType
+    if (typeof data?.token === 'string') {
+      helpers.setToken(data.token)
+    }
+    if (isUserObject(data?.user)) {
+      if (isMounted()) await mounted(dispatch(actions.setAuthenticated(data.user)))
+    } else {
+      console.log('error', data)
+    }
+    return [data, data?.errors ? data.errors : null]
+  }, [isMounted, mounted, dispatch, signupUser])
+  useEffect(() => {
+    if (start && isMounted())
+      mounted(
+        run().then(([data, errors]) => {
+          if (isMounted()) setData(data)
+          if (isMounted()) setErrors(errors)
+        })
+      )
+  }, [start, isMounted, mounted, run, setErrors])
+  return [data, data?.errors ? data.errors : null]
+}
+```
+
+The first thing you might notice, aside from that being a lot of code, is that it takes arguments this time. Well, we need to be able to get an email and password combo from the user, so yes. This requires a form, and some validation logic as well. But we'll leave that for later. 
+
+For now, the main thing to note about our function signature is that we will be passing in a `setErrors` local state setter callback to this hook as an argument later, and this time, our hook is marked `async`. That will all make more sense once we get to the component, but basically, we want to be able to run this hook multiple times depending on its output because the user might accidentally enter some suspect information with their gross meatspace fingers. So this hook, while a little moer complex, still follows a similar structure as the earlier `checkAuth` hook, and what's more it actually helps us account for those accidental meatspace possibilities nicely. 
+
+It returns a `Promise`. If you aren't a fan of promises, become one, now! I command thee. It's *important*. 
+
+Most of the setup is the same, except this time our run function actually returns something. How exciting! It returns another promise, in fact. Can you guess why? The answer starts with an `a`  and ends with a `sync` if you need a hint. Or maybe it ends in a sink, if you're not careful. Stop coding in the bathroom, you weirdo!
+
+Anyway, on we continue with much the same logic as before, but this time after we have defined our `run` function we slip into a `useEffect` hook where we check some variables to see if our function should run. If those variables check out, we employ our `mounted` function to conditionally run our asynchronous code, then after it's finished we call `.then` on its return.
+
+Inside of our `.then` we pass in an argument of a callback that accepts the return type of our `run` function. Inside that callback, we finally set our `data` and `errors` variables if the component is still mounted. It's a lot like before, only this time it's a little more asynchronous, I guess. 
+
+After all that, we are finally ready to return another promise and get to work on our signup component. Yay!
+
+##### Signup component
+
+Beware, a lot of code incoming:
+
+```tsx
+const Signup: NextPage = memo(() => {
+  const user: UserObject | null | undefined = useSelector(state => state.user.currentUser)
+  const [start, setStart] = useState(false)
+  const [done, setDone] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errors, setErrors] = useState<ErrorType['errors'] | null>(null)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const isMounted = useMountedState()
+  useEffect(() => {
+    if (start && isMounted()) {
+      setStart(false)
+    }
+  }, [start, isMounted])
+  apiHooks
+    .useSignupUser(email, password, confirmPassword, start, setErrors)
+    .then(([data, errors]) => {
+      if (!done && (data || errors) && isMounted()) setDone(true)
+    })
+  const displayErrors = (message: string) => {
+    setValidationErrors((prev: string[]) => {
+      return prev.find(element => element === message) ? prev : [...prev, message]
+    })
+  }
+  const handleSubmit = (checkStatus: boolean, event: FormEvent) => {
+    event.preventDefault()
+    let emailGood = false
+    let passwordMatchGood = false
+    let passwordLengthGood = false
+    if (/\w+@\w+\.\w+/i.test(email)) {
+      emailGood = true
+    } else displayErrors('Invalid email address')
+    if (password === confirmPassword) {
+      passwordMatchGood = true
+    } else displayErrors('Passwords must match')
+    if (password.length > 7) {
+      passwordLengthGood = true
+    } else displayErrors('Password must be at least eight characters')
+    if (emailGood && passwordMatchGood && passwordLengthGood && done && isMounted()) {
+      errors && setErrors(null)
+      !start && setStart(true)
+      setDone(false)
+    }
+  }
+  return done && user ? (
+    <Redirect to="/whatever" />
+  ) : !done ? (
+    <Loader center size="lg" content="loading..." />
+  ) : (
+    <FlexboxGrid justify="center">
+      <FlexboxGrid.Item colspan={12}>
+        <Panel header={<h3>Sign up</h3>} bordered>
+          {((errors && errors.length > 0) || validationErrors.length > 0) && (
+            <Message
+              showIcon
+              closable
+              type="error"
+              header="Error"
+              onClose={event => {
+                if (event && isMounted()) {
+                  setErrors(null)
+                  setValidationErrors([])
+                }
+              }}
+            >
+              {validationErrors.map(
+                (error: string, i: number) => error !== '' && <p key={i * Math.random()}>{error}</p>
+              )}
+              {errors &&
+                errors.map((error, i: number) => <p key={i * Math.random()}>{error.message}</p>)}
+            </Message>
+          )}
+          <Form fluid onSubmit={handleSubmit}>
+            <Form.Group>
+              <Form.ControlLabel>Email address</Form.ControlLabel>
+              <Form.Control
+                name="email"
+                onChange={value => {
+                  if (isMounted()) {
+                    setEmail(value)
+                  }
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.ControlLabel>Password</Form.ControlLabel>
+              <Form.Control
+                name="password"
+                type="password"
+                onChange={value => {
+                  if (isMounted()) {
+                    setPassword(value)
+                  }
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.ControlLabel>Confirm password</Form.ControlLabel>
+              <Form.Control
+                name="confirmPassword"
+                type="password"
+                onChange={value => {
+                  if (isMounted()) {
+                    setConfirmPassword(value)
+                  }
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <ButtonToolbar>
+                <Button appearance="primary" type="submit">
+                  Sign up
+                </Button>
+              </ButtonToolbar>
+            </Form.Group>
+          </Form>
+        </Panel>
+      </FlexboxGrid.Item>
+    </FlexboxGrid>
+  )
+})
+```
+
+Just so you know, this component contains a form based on React Suite. Yes, that again; bear with me. It is a nice form, at least. 
+
+First we set up some state, including a `user` global state variable that grabs our `currentUser` from the Redux store. This will help us know if our `useSignupUser` hook succeeded. 
+
+We also must remember to create the `errors` local state and its accompanying `setErrors` setter function so that our hook works correctly, alone with `start` and `done` local state variables as well. The `errors` variable will let us display a message when something goes wrong as long as we remember to set and reset it according to the state of things, and the `start` and `done` variables will act as traffic lights for our hook. 
+
+Look closely at the `useEffect` call that comes before our hook (and make sure it does indeed come before the hook in your implementation). Once you've looked that over, check out the `handleSubmit` function, especially the bit near the bottom of that function. After that, check out our component's return statement and see if you can follow along with the outline below:
+
+- When the component mounts, `start` is false and `done` is true since that's how we initialized those variables with `useState`
+- At first render the form will be shown so the user can choose a snazzy email and password combo to sign up with
+- When the user submits the form, `start` flips to `true` and `done` flips to false
+- Immediately afterwards our hook begins running since `start` is now true
+- At the same time as our hook starts, we flip `start` to false again so that it won't run a second time
+- Don't look now but our loading spinner has begun to be displayed since `done` is false
+- Meanwhile, our hook does its thing, and when the promise it returns is resolved somehow, we call `.then`  on it
+- Inside the `.then`, if we haven't already set `done` to true again, and if at least one of `data` or `errors` returned something truthy (which they should), we set `done` to true again, watching out in case our component unmounts, as always
+- On the next DOM update after `done` is true, our component will have either begun to redirect the user somewhere since our hook should have dispatched a `SET_AUTHENTICATED` action in the case of  a successful signup, or it will again display the form like before, only this time with some helpful error messages showing what went wrong
+- If necessary, repeat the preceding steps until there's a successful form submission or the user gets bored or whatever
+
+And that's most of the stuff you came for I think, as far as that component and hook are concerned. 
+
+I'll keep going with a couple more components and hooks, sans narration, since they should hopefully be starting to make a little sense by now.
+
+#### Login functionality
+
+##### useLoginUser hook
+
+```typescript
+useLoginUser: async (
+  email: string,
+  password: string,
+  start: boolean,
+  setErrors: Dispatch<ErrorType['errors'] | null>
+): Promise<HookReturnType> => {
+  const [data, setData] = useState<(AuthenticationType & ErrorType) | null>(null)
+  const dispatch: ThunkAppDispatch = useDispatch()
+  const mounted = usePromise()
+  const isMounted = useMountedState()
+  const loginUser = useCallback(
+    (url: string) => helpers.fetcher(url, 'POST', false, { email, password }),
+    [email, password]
+  )
+  const run = useCallback(async (): Promise<
+    [(AuthenticationType & ErrorType) | null, ErrorType['errors'] | null]
+  > => {
+    const data = (await mounted(loginUser('/login'))) as AuthenticationType & ErrorType
+    if (typeof data?.token === 'string') {
+      helpers.setToken(data.token)
+    }
+    if (isUserObject(data?.user)) {
+      if (isMounted()) await mounted(dispatch(actions.setAuthenticated(data.user)))
+    } else {
+      console.log('error', data)
+    }
+    return [data, data?.errors ? data.errors : null]
+  }, [dispatch, isMounted, mounted, loginUser])
+  useEffect(() => {
+    if (start && isMounted())
+      mounted(
+        run().then(([data, errors]) => {
+          if (isMounted()) {
+            setErrors(errors)
+            setData(data)
+          }
+        })
+      )
+  }, [start, isMounted, mounted, run, setErrors])
+  return [data, data?.errors ? data.errors : null]
+}
+```
+
+##### Login component
+
+```tsx
+const Login: NextPage = memo(() => {
+  const user: UserObject | null = useSelector(state => state.user.currentUser)
+  const [errors, setErrors] = useState<ErrorType['errors'] | null>(null)
+  const [start, setStart] = useState(false)
+  const [done, setDone] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const isMounted = useMountedState()
+  useEffect(() => {
+    if (start && isMounted()) {
+      setStart(false)
+    }
+  }, [start, isMounted])
+  apiHooks.useLoginUser(email, password, start, setErrors).then(([data, errors]) => {
+    if (!done && (data || errors) && isMounted()) setDone(true)
+  })
+  const handleSubmit = (checkStatus: boolean, event: FormEvent) => {
+    event.preventDefault()
+    if (done && isMounted()) {
+      errors && setErrors(null)
+      !start && setStart(true)
+      setDone(false)
+    }
+  }
+  return done && user ? (
+    <Redirect to="/whatever" />
+  ) : !done ? (
+    <Loader center size="lg" content="logging in..." />
+  ) : (
+    <FlexboxGrid justify="center">
+      <FlexboxGrid.Item colspan={12}>
+        <Panel header={<h3>Log in</h3>} bordered>
+          {errors && errors.length > 0 && (
+            <Message
+              showIcon
+              closable
+              type="error"
+              header="Error"
+              onClose={event => {
+                if (event && isMounted()) setErrors(null)
+              }}
+            >
+              {errors.map((error: { message: string }, i: number) => (
+                <p key={i}>{error.message}</p>
+              ))}
+            </Message>
+          )}
+          <Form fluid onSubmit={handleSubmit}>
+            <Form.Group>
+              <Form.ControlLabel>Email address</Form.ControlLabel>
+              <Form.Control
+                name="email"
+                type="text"
+                autoComplete="email"
+                onChange={value => {
+                  setEmail(value)
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.ControlLabel>Password</Form.ControlLabel>
+              <Form.Control
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                onChange={value => {
+                  setPassword(value)
+                }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <ButtonToolbar>
+                <Button appearance="primary" type="submit">
+                  Log in
+                </Button>
+                <Button appearance="link">Forgot password?</Button>
+              </ButtonToolbar>
+            </Form.Group>
+          </Form>
+        </Panel>
+      </FlexboxGrid.Item>
+    </FlexboxGrid>
+  )
+})
+```
+
+#### Logout functionality
+
+##### useLogoutUser hook
+
+Back to the format of the `useCheckAuth` hook with the non-promise return type! 🙂
+
+```typescript
+useLogoutUser: (): [{ token: string } | ErrorType | null, ErrorType['errors'] | null] => {
+  const dispatch: ThunkAppDispatch = useDispatch()
+  const mounted = usePromise()
+  const isMounted = useMountedState()
+  const [data, setData] = useState<{ token: string } | ErrorType | null>(null)
+  const [errors, setErrors] = useState<ErrorType['errors'] | null>(null)
+  const logoutUser = useCallback((url: string) => helpers.fetcher(url, 'GET', true), [])
+  const run = useCallback(async () => {
+    const data = (await mounted(logoutUser('/logout'))) as { token: string } & ErrorType
+    helpers.deleteToken()
+    if (isMounted()) await mounted(dispatch(actions.setUnauthenticated()))
+    if (typeof data?.token === 'string') {
+      console.log('token', data.token)
+      if (isMounted()) setData(data)
+    } else {
+      console.log('error', data)
+      if (isMounted()) setErrors(data?.errors ? data.errors : null)
+    }
+  }, [isMounted, mounted, dispatch, logoutUser])
+  useEffect(() => {
+    if (isMounted()) mounted(run())
+  }, [])
+  return [data, errors]
+}
+```
+
+##### Logout component
+
+Last but not least, a very simple logout component for you.
+
+```tsx
+import type { NextPage } from 'next'
+import { memo } from 'react'
+import { Loader } from 'rsuite'
+import apiHooks from '../api'
+import Redirect from '../components/redirect'
+
+const Logout: NextPage = memo(() => {
+  const [data, errors] = apiHooks.useLogoutUser()
+  return data || errors ? (
+    <Redirect to="/login" />
+  ) : (
+    <Loader size="lg" center content="logging out..." />
+  )
+})
+
+Logout.displayName = 'Logout'
+export default Logout
+
+```
+
+## Wrapping up
+
+And there you have it! I should not be in charge of security for anything, I'm quite sure. But if you are just beginning to explore authentication and AdonisJS and Next.js and Typescript and hooks and such like me, then I hope some of my little snippets or explanations prove useful somehow. 
+
+In any case, thanks for coming along with me for this deceptively long ride. At least, for me it was deceptive. It's like 1 am dude; my body hurts from doing the coding thing too much. I have no idea where the time went. And it's always like this. You can tell because my writing gets less coherent as you go further into the post. I mean, I just used the word 'dude' in something aimed at a professional audience; ugh. Yeah, better wrap this up fast before things really get out of hand.
+
+### Thanks for reading!

@@ -23,9 +23,9 @@ export default function Project({ data }) {
           },
           images: [
             {
-              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
-              width: 1280,
-              height: 720,
+              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.images.fallback.src}`,
+              width: Math.round(data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.width),
+              height: Math.round(data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.height),
               alt: data.mdx.frontmatter.name
             }
           ]

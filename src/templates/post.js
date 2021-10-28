@@ -21,16 +21,14 @@ export default function Post({ location, data }) {
             publishedTime: data.mdx.frontmatter.date,
             authors: [`https://grahamhemsley.com/author`],
             tags: [
-              ...data.mdx.frontmatter.tags.map(tag => {
-                return tag.name
-              })
+              ...data.mdx.frontmatter.tags.map(tag => tag.name)
             ]
           },
           images: [
             {
-              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.src}`,
-              width: 1280,
-              height: 720,
+              url: `https://grahamhemsley.com${data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.images.fallback.src}`,
+              width: Math.round(data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.width),
+              height: Math.round(data.mdx.frontmatter.image.childImageSharp.gatsbyImageData.height),
               alt: data.mdx.frontmatter.title
             }
           ]
